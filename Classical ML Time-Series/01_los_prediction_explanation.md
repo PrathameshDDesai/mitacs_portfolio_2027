@@ -254,11 +254,80 @@ print(f"Decision Tree RMSE: {rmse_dt:.4f}")
 
 ## Model Performance Comparison
 
-| Evaluation Metric | Linear Regression | Decision Tree Regressor | Winning Model |
-| :--- | :---: | :---: | :---: |
-| **Mean Absolute Error (MAE)** | `0.7302` days | **`0.4000` days** | 🏆 **Decision Tree** |
-| **Root Mean Square Error (RMSE)** | **`0.9654` days** | `0.9798` days | 🏆 **Linear Regression** |
+| Evaluation Metric | Linear Regression | Decision Tree | Random Forest | XGBoost | Best Performing Model |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Mean Absolute Error (MAE)** | `0.7302` | `0.4000` | **`0.2436`** | `0.2856` | 🏆 **Random Forest** |
+| **Root Mean Square Error (RMSE)** | `0.9654` | `0.9798` | **`0.5691`** | `0.7009` | 🏆 **Random Forest** |
 
-### Key Analytical Takeaways
-1. **Decision Tree Regressor** achieves a significantly lower **MAE (0.4000 days)** compared to Linear Regression (0.7302 days), demonstrating its capability to capture non-linear clinical pathways and categorical threshold effects in hospital length of stay data.
-2. **Linear Regression** produces a slightly lower **RMSE (0.9654 days)**, indicating more stable predictions across extreme tail cases due to its global linear constraint.
+---
+
+## Tasks 31–34: Random Forest Regressor & Metrics
+
+### Concept & Mathematical Foundation
+**Random Forest Regressor** constructs an ensemble of uncorrelated decision trees using bagging (bootstrap aggregation) and random feature subspace sampling:
+$$\hat{y}_{rf} = \frac{1}{B} \sum_{b=1}^{B} T_b(x)$$
+
+By averaging predictions across $B=100$ independent decision trees, Random Forest significantly reduces variance without increasing bias.
+
+### Implementation
+```python
+# Tasks 31-34: Random Forest Regressor Model
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+# Task 31 & 32: Train Random Forest on training data
+rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
+
+# Task 33: Predict on test data
+y_pred_rf = rf_model.predict(X_test)
+
+# Task 34: Calculate MAE and RMSE
+mae_rf = mean_absolute_error(y_test, y_pred_rf)
+rmse_rf = np.sqrt(mean_squared_error(y_test, y_pred_rf))
+
+print(f"Random Forest MAE: {mae_rf:.4f}")
+print(f"Random Forest RMSE: {rmse_rf:.4f}")
+```
+
+### Empirical Results
+- **MAE**: **`0.2436`** days
+- **RMSE**: **`0.5691`** days
+
+---
+
+## Tasks 35–40: XGBoost Regressor & Conclusion
+
+### Concept & Mathematical Foundation
+**XGBoost (Extreme Gradient Boosting)** builds trees sequentially using gradient tree boosting:
+$$\mathcal{L}^{(t)} = \sum_{i=1}^{n} l\left(y_i, \hat{y}_i^{(t-1)} + f_t(x_i)\right) + \Omega(f_t)$$
+
+It optimizes a second-order Taylor expansion of the loss function with L1/L2 regularization on tree complexity ($\Omega$), preventing overfitting while modeling non-linear interactions.
+
+### Implementation
+```python
+# Tasks 35-39: XGBoost Regressor Model
+from xgboost import XGBRegressor
+
+# Task 36 & 37: Train XGBoost on training data
+xgb_model = XGBRegressor(n_estimators=100, random_state=42)
+xgb_model.fit(X_train, y_train)
+
+# Task 38: Predict on test data
+y_pred_xgb = xgb_model.predict(X_test)
+
+# Task 39: Calculate MAE and RMSE
+mae_xgb = mean_absolute_error(y_test, y_pred_xgb)
+rmse_xgb = np.sqrt(mean_squared_error(y_test, y_pred_xgb))
+
+print(f"XGBoost MAE: {mae_xgb:.4f}")
+print(f"XGBoost RMSE: {rmse_xgb:.4f}")
+```
+
+### Empirical Results
+- **MAE**: **`0.2856`** days
+- **RMSE**: **`0.7009`** days
+
+### Task 40: Conclusion
+> **Conclusion:** Both ensemble models (Random Forest and XGBoost) significantly outperform single decision trees and linear regression. **Random Forest** achieved the best overall performance with the lowest MAE (`0.2436` days) and lowest RMSE (`0.5691` days).
+
