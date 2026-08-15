@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MITACS Machine Learning & Cybersecurity Interactive Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+            --accent-amber: #f59e0b;
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            padding-bottom: 50px;
+        }
+
+        header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 20px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .brand-title h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-title p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-blue);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .panel {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-banner {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hero-text h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-text p {
+            color: var(--text-muted);
+            font-size: 14px;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+
+        .preset-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent-blue);
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 7fr 5fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 26px;
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .form-group input, .form-group select {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(59, 130, 246, 0.5);
+        }
+
+        .result-box {
+            text-align: center;
+            padding: 30px;
+            border-radius: 16px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--card-border);
+            margin-top: 10px;
+        }
+
+        .metric-value {
+            font-size: 48px;
+            font-weight: 800;
+            margin: 10px 0;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-green { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .badge-amber { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); border: 1px solid var(--accent-amber); }
+        .badge-red { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+        .model-breakdown {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .breakdown-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 14px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .breakdown-card h4 {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .breakdown-card p {
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .meter-container {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .meter-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .meter-bar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-red));
+            transition: width 0.6s ease;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="brand-logo">M</div>
+            <div class="brand-title">
+                <h1>MITACS Machine Learning Suite</h1>
+                <p>Healthcare Analytics & Behavioral Cyber-Defense Portal</p>
+            </div>
+        </div>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('los-panel', this)">🏥 Hospital LOS Predictor</button>
+            <button class="tab-btn" onclick="switchTab('anomaly-panel', this)">🛡️ AgentGuard Threat Detector</button>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- ================= PANEL 1: LOS PREDICTION ================= -->
+        <div id="los-panel" class="panel active">
+            <div class="hero-banner">
+                <div class="hero-text">
+                    <h2>Patient Length of Stay (LOS) Prediction</h2>
+                    <p>Enter clinical admission variables below to predict patient stay duration (in days) using our ensemble of Random Forest & XGBoost models trained on hospital records.</p>
+                    <div class="preset-container">
+                        <span style="font-size:13px; color:var(--text-muted); align-self:center;">Presets:</span>
+                        <button class="preset-btn" onclick="loadLosPreset('routine')">Routine Checkup</button>
+                        <button class="preset-btn" onclick="loadLosPreset('surgical')">Complex Surgical</button>
+                        <button class="preset-btn" onclick="loadLosPreset('icu')">High-Severity ICU</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-layout">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📋 Clinical Feature Inputs</div>
+                    </div>
+                    <form id="los-form" onsubmit="handleLosSubmit(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="Month">Month of Admission</label>
+                                <select id="Month">
+                                    <option value="Jan">January</option>
+                                    <option value="Feb">February</option>
+                                    <option value="Mar">March</option>
+                                    <option value="Apr">April</option>
+                                    <option value="May">May</option>
+                                    <option value="Jun">June</option>
+                                    <option value="Jul">July</option>
+                                    <option value="Aug">August</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="Gender">Gender</label>
+                                <select id="Gender">
+                                    <option value="M">Male</option>
+                                    <option value="F">Female</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="Specialty">Medical Specialty</label>
+                                <select id="Specialty">
+                                    <option value="Cardiology">Cardiology</option>
+                                    <option value="Orthopedics">Orthopedics</option>
+                                    <option value="Neurology">Neurology</option>
+                                    <option value="General Surgery">General Surgery</option>
+                                    <option value="Pediatrics">Pediatrics</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="Doctor_Type">Doctor Type</label>
+                                <select id="Doctor_Type">
+                                    <option value="Attending">Attending</option>
+                                    <option value="Resident">Resident</option>
+                                    <option value="Consultant">Consultant</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="CMI_Value">CMI Value (Case Mix Index)</label>
+                                <input type="number" step="0.1" id="CMI_Value" value="1.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="Severity">Case Severity</label>
+                                <select id="Severity">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Extreme">Extreme</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="InsurancePlanName">Insurance Plan</label>
+                                <select id="InsurancePlanName">
+                                    <option value="Advance">Advance</option>
+                                    <option value="NC-Blue">NC-Blue</option>
+                                    <option value="Gold-Choice">Gold-Choice</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="Revenue">Hospital Revenue ($)</label>
+                                <input type="number" id="Revenue" value="12500">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit">🔮 Predict Length of Stay</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📊 Inference Results</div>
+                    </div>
+                    <div class="result-box">
+                        <span id="los-badge" class="badge badge-green">Ready for Inference</span>
+                        <div class="metric-value" id="los-ensemble-val">-- Days</div>
+                        <p style="color:var(--text-muted); font-size:13px;">Ensemble Predicted Hospital Stay</p>
+
+                        <div class="model-breakdown">
+                            <div class="breakdown-card">
+                                <h4>Random Forest</h4>
+                                <p id="los-rf-val">--</p>
+                            </div>
+                            <div class="breakdown-card">
+                                <h4>XGBoost</h4>
+                                <p id="los-xgb-val">--</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PANEL 2: ANOMALY DETECTION ================= -->
+        <div id="anomaly-panel" class="panel">
+            <div class="hero-banner">
+                <div class="hero-text">
+                    <h2>AgentGuard Network Anomaly Detector</h2>
+                    <p>Unsupervised Intrusion Detection System powered by Isolation Forest & Deep Autoencoders trained on NSL-KDD network packet traffic statistics.</p>
+                    <div class="preset-container">
+                        <span style="font-size:13px; color:var(--text-muted); align-self:center;">Preset Traffic:</span>
+                        <button class="preset-btn" onclick="loadSecPreset('normal')">Normal Web Traffic</button>
+                        <button class="preset-btn" onclick="loadSecPreset('dos')">Neptune DoS Attack</button>
+                        <button class="preset-btn" onclick="loadSecPreset('portscan')">Satan Port Scan</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-layout">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🌐 Packet Telemetry Features</div>
+                    </div>
+                    <form id="sec-form" onsubmit="handleSecSubmit(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="duration">Flow Duration (sec)</label>
+                                <input type="number" id="duration" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="src_bytes">Source Bytes</label>
+                                <input type="number" id="src_bytes" value="215">
+                            </div>
+                            <div class="form-group">
+                                <label for="dst_bytes">Destination Bytes</label>
+                                <input type="number" id="dst_bytes" value="4500">
+                            </div>
+                            <div class="form-group">
+                                <label for="count">Connections to Host (Count)</label>
+                                <input type="number" id="count" value="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="srv_count">Connections to Service (Count)</label>
+                                <input type="number" id="srv_count" value="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="serror_rate">SYN Error Rate (0.0 - 1.0)</label>
+                                <input type="number" step="0.01" id="serror_rate" value="0.0">
+                            </div>
+                            <div class="form-group">
+                                <label for="same_srv_rate">Same Service Rate (0.0 - 1.0)</label>
+                                <input type="number" step="0.01" id="same_srv_rate" value="1.0">
+                            </div>
+                            <div class="form-group">
+                                <label for="dst_host_count">Dst Host Count</label>
+                                <input type="number" id="dst_host_count" value="255">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));">🛡️ Inspect Network Traffic</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🔍 Threat Assessment</div>
+                    </div>
+                    <div class="result-box">
+                        <span id="sec-badge" class="badge badge-green">Awaiting Traffic Scan</span>
+                        <div class="metric-value" id="sec-threat-val" style="font-size:26px; margin: 15px 0;">--</div>
+                        
+                        <div class="model-breakdown">
+                            <div class="breakdown-card">
+                                <h4>Isolation Forest</h4>
+                                <p id="sec-if-val">--</p>
+                            </div>
+                            <div class="breakdown-card">
+                                <h4>Autoencoder</h4>
+                                <p id="sec-ae-val">--</p>
+                            </div>
+                        </div>
+
+                        <div class="meter-container">
+                            <div class="meter-label">
+                                <span>Reconstruction Error (MSE)</span>
+                                <span id="sec-mse-val">0.0000</span>
+                            </div>
+                            <div class="meter-bar">
+                                <div class="meter-fill" id="sec-meter-fill"></div>
+                            </div>
+                            <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">95th Percentile Threshold: <span id="sec-threshold-val">--</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function switchTab(panelId, btn) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // Presets for LOS Prediction
+        function loadLosPreset(type) {
+            if (type === 'routine') {
+                document.getElementById('Month').value = 'Jan';
+                document.getElementById('Gender').value = 'M';
+                document.getElementById('Specialty').value = 'Pediatrics';
+                document.getElementById('Doctor_Type').value = 'Resident';
+                document.getElementById('CMI_Value').value = '0.8';
+                document.getElementById('Severity').value = 'Low';
+                document.getElementById('Revenue').value = '3500';
+            } else if (type === 'surgical') {
+                document.getElementById('Month').value = 'Mar';
+                document.getElementById('Gender').value = 'F';
+                document.getElementById('Specialty').value = 'General Surgery';
+                document.getElementById('Doctor_Type').value = 'Attending';
+                document.getElementById('CMI_Value').value = '2.4';
+                document.getElementById('Severity').value = 'High';
+                document.getElementById('Revenue').value = '24000';
+            } else if (type === 'icu') {
+                document.getElementById('Month').value = 'Aug';
+                document.getElementById('Gender').value = 'M';
+                document.getElementById('Specialty').value = 'Neurology';
+                document.getElementById('Doctor_Type').value = 'Consultant';
+                document.getElementById('CMI_Value').value = '3.8';
+                document.getElementById('Severity').value = 'Extreme';
+                document.getElementById('Revenue').value = '48000';
+            }
+        }
+
+        // Presets for Network Security
+        function loadSecPreset(type) {
+            if (type === 'normal') {
+                document.getElementById('duration').value = '0';
+                document.getElementById('src_bytes').value = '215';
+                document.getElementById('dst_bytes').value = '4500';
+                document.getElementById('count').value = '5';
+                document.getElementById('srv_count').value = '5';
+                document.getElementById('serror_rate').value = '0.0';
+                document.getElementById('same_srv_rate').value = '1.0';
+                document.getElementById('dst_host_count').value = '255';
+            } else if (type === 'dos') {
+                document.getElementById('duration').value = '0';
+                document.getElementById('src_bytes').value = '0';
+                document.getElementById('dst_bytes').value = '0';
+                document.getElementById('count').value = '280';
+                document.getElementById('srv_count').value = '280';
+                document.getElementById('serror_rate').value = '1.0';
+                document.getElementById('same_srv_rate').value = '1.0';
+                document.getElementById('dst_host_count').value = '255';
+            } else if (type === 'portscan') {
+                document.getElementById('duration').value = '2';
+                document.getElementById('src_bytes').value = '12';
+                document.getElementById('dst_bytes').value = '0';
+                document.getElementById('count').value = '150';
+                document.getElementById('srv_count').value = '1';
+                document.getElementById('serror_rate').value = '0.85';
+                document.getElementById('same_srv_rate').value = '0.05';
+                document.getElementById('dst_host_count').value = '150';
+            }
+        }
+
+        async function handleLosSubmit(e) {
+            e.preventDefault();
+            const payload = {
+                Month: document.getElementById('Month').value,
+                Gender: document.getElementById('Gender').value,
+                Specialty: document.getElementById('Specialty').value,
+                'Doctor Type': document.getElementById('Doctor_Type').value,
+                'CMI Value': document.getElementById('CMI_Value').value,
+                Severity: document.getElementById('Severity').value,
+                InsurancePlanName: document.getElementById('InsurancePlanName').value,
+                Revenue: document.getElementById('Revenue').value
+            };
+
+            try {
+                const res = await fetch('/api/predict_los', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    document.getElementById('los-ensemble-val').innerText = data.ensemble_prediction + ' Days';
+                    document.getElementById('los-rf-val').innerText = data.rf_prediction + ' Days';
+                    document.getElementById('los-xgb-val').innerText = data.xgb_prediction + ' Days';
+
+                    const badge = document.getElementById('los-badge');
+                    badge.innerText = data.risk_category;
+                    if (data.ensemble_prediction >= 6) {
+                        badge.className = 'badge badge-red';
+                    } else if (data.ensemble_prediction >= 3.5) {
+                        badge.className = 'badge badge-amber';
+                    } else {
+                        badge.className = 'badge badge-green';
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function handleSecSubmit(e) {
+            e.preventDefault();
+            const payload = {
+                duration: document.getElementById('duration').value,
+                src_bytes: document.getElementById('src_bytes').value,
+                dst_bytes: document.getElementById('dst_bytes').value,
+                count: document.getElementById('count').value,
+                srv_count: document.getElementById('srv_count').value,
+                serror_rate: document.getElementById('serror_rate').value,
+                same_srv_rate: document.getElementById('same_srv_rate').value,
+                dst_host_count: document.getElementById('dst_host_count').value
+            };
+
+            try {
+                const res = await fetch('/api/predict_anomaly', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    document.getElementById('sec-threat-val').innerText = data.overall_threat;
+                    document.getElementById('sec-if-val').innerText = data.isolation_forest_anomaly ? 'ANOMALY' : 'NORMAL';
+                    document.getElementById('sec-ae-val').innerText = data.autoencoder_anomaly ? 'ANOMALY' : 'NORMAL';
+                    document.getElementById('sec-mse-val').innerText = data.reconstruction_error;
+                    document.getElementById('sec-threshold-val').innerText = data.threshold;
+
+                    const badge = document.getElementById('sec-badge');
+                    const fill = document.getElementById('sec-meter-fill');
+                    const percent = Math.min(data.anomaly_ratio, 100);
+                    fill.style.width = percent + '%';
+
+                    if (data.overall_threat.includes('ATTACK')) {
+                        badge.className = 'badge badge-red';
+                        badge.innerText = '⚠️ INTRUSION DETECTED';
+                    } else {
+                        badge.className = 'badge badge-green';
+                        badge.innerText = '✅ BENIGN TRAFFIC';
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
