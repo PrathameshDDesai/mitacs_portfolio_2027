@@ -7,7 +7,7 @@ services:
     plan: free
     rootDir: 01_hospital_los_prediction
     buildCommand: pip install -r requirements.txt && python train_and_export.py
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 120
     envVars:
       - key: FLASK_ENV
         value: production
@@ -22,7 +22,7 @@ services:
     plan: free
     rootDir: 02_network_anomaly_detection
     buildCommand: pip install -r requirements.txt && python train_and_export.py
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 120
     envVars:
       - key: FLASK_ENV
         value: production

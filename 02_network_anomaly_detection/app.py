@@ -1,4 +1,8 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['MKL_NUM_THREADS'] = '1'
+
 import json
 import joblib
 import ipaddress
@@ -11,6 +15,7 @@ from waitress import serve
 
 app = Flask(__name__)
 CORS(app)
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVED_MODELS_DIR = os.path.join(BASE_DIR, "saved_models")
