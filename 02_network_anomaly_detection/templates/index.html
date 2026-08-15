@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project 2: AgentGuard Network Anomaly Threat Detector</title>
+    <title>Project 2: AgentGuard Network Anomaly & IP Threat Inspector</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,6 +13,7 @@
             --accent-purple: #8b5cf6;
             --accent-blue: #3b82f6;
             --accent-green: #10b981;
+            --accent-amber: #f59e0b;
             --accent-red: #ef4444;
             --text-primary: #f8fafc;
             --text-muted: #94a3b8;
@@ -23,14 +24,15 @@
             background-color: var(--bg-dark);
             color: var(--text-primary);
             min-height: 100vh;
-            background-image: radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.2) 0px, transparent 50%);
+            background-image: radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.2) 0px, transparent 50%),
+                              radial-gradient(at 0% 100%, rgba(239, 68, 68, 0.15) 0px, transparent 50%);
             padding: 40px 20px;
         }
 
         .container { max-width: 1100px; margin: 0 auto; }
         header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border);
+            margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border);
         }
 
         .title-group h1 { font-size: 26px; font-weight: 800; }
@@ -41,6 +43,35 @@
             color: var(--accent-purple); padding: 6px 14px; border-radius: 20px;
             font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
         }
+
+        /* IP Inspector Banner */
+        .ip-banner {
+            background: rgba(15, 23, 42, 0.85); border: 1px solid var(--card-border);
+            border-radius: 16px; padding: 20px; margin-bottom: 24px;
+            display: flex; justify-content: space-between; align-items: center; gap: 16px;
+        }
+
+        .ip-input-group { display: flex; gap: 10px; flex: 1; }
+        .ip-input-group input {
+            flex: 1; background: rgba(30, 41, 59, 0.9); border: 1px solid var(--card-border);
+            color: #fff; padding: 10px 16px; border-radius: 10px; font-family: 'JetBrains Mono', monospace;
+            font-size: 14px; outline: none;
+        }
+        .ip-input-group input:focus { border-color: var(--accent-purple); }
+
+        .btn-inspect-ip {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700;
+            font-size: 13px; cursor: pointer; white-space: nowrap;
+        }
+
+        .ip-presets { display: flex; gap: 6px; }
+        .ip-preset-btn {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border);
+            color: var(--text-muted); padding: 6px 10px; border-radius: 8px; font-size: 11px;
+            font-family: 'JetBrains Mono', monospace; cursor: pointer;
+        }
+        .ip-preset-btn:hover { background: rgba(139, 92, 246, 0.2); color: #fff; border-color: var(--accent-purple); }
 
         .grid { display: grid; grid-template-columns: 6fr 6fr; gap: 24px; }
         .card {
@@ -82,6 +113,7 @@
 
         .badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 12px; text-transform: uppercase; }
         .badge-green { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .badge-amber { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); border: 1px solid var(--accent-amber); }
         .badge-red { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
 
         .meter-bar { height: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 5px; overflow: hidden; margin-top: 8px; }
@@ -92,11 +124,30 @@
     <div class="container">
         <header>
             <div class="title-group">
-                <h1>🛡️ Project 2: AgentGuard Network Anomaly Threat Detector</h1>
-                <p>Standalone Cyber-Defense ML Service (Isolation Forest & Autoencoder)</p>
+                <h1>🛡️ Project 2: AgentGuard Network Anomaly & IP Threat Inspector</h1>
+                <p>Standalone Cyber-Defense ML Service (Direct IP Inspection + Deep Autoencoder & Isolation Forest)</p>
             </div>
             <div class="port-badge">PORT: 5002</div>
         </header>
+
+        <!-- Direct IP Address Inspection Bar -->
+        <div class="ip-banner">
+            <div style="flex:1;">
+                <h3 style="font-size:15px; font-weight:700; margin-bottom:6px;">🔍 Direct IP Address Threat Lookup</h3>
+                <div class="ip-input-group">
+                    <input type="text" id="ip_address" placeholder="Enter IP address (e.g. 185.220.101.5 or 192.168.1.45)" value="185.220.101.5">
+                    <button class="btn-inspect-ip" onclick="inspectDirectIP()">🛡️ Check IP Threat Level</button>
+                </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <span style="font-size:11px; color:var(--text-muted);">Quick IP Presets:</span>
+                <div class="ip-presets">
+                    <button class="ip-preset-btn" onclick="setIPPreset('192.168.1.45')">192.168.1.45 (Local)</button>
+                    <button class="ip-preset-btn" onclick="setIPPreset('185.220.101.5')">185.220.101.5 (Tor Exit)</button>
+                    <button class="ip-preset-btn" onclick="setIPPreset('45.142.120.10')">45.142.120.10 (DoS)</button>
+                </div>
+            </div>
+        </div>
 
         <div class="grid">
             <div class="card">
@@ -126,6 +177,8 @@
                 <div class="result-panel">
                     <span id="badge" class="badge badge-green">Ready to Scan</span>
                     <div id="threat-title" class="threat-title">Awaiting Traffic</div>
+                    <p style="font-size:12px; color:var(--text-muted);" id="ip-target-label">IP Inspected: None</p>
+                    <p style="font-size:12px; font-weight:600; color:var(--accent-purple); margin-top:4px;" id="reputation-label">Reputation: Unverified</p>
 
                     <div class="metric-grid">
                         <div class="metric-card"><h4>Isolation Forest</h4><p id="if-val">--</p></div>
@@ -146,8 +199,40 @@
     </div>
 
     <script>
+        function setIPPreset(ip) {
+            document.getElementById('ip_address').value = ip;
+            inspectDirectIP();
+        }
+
+        async function inspectDirectIP() {
+            const ip = document.getElementById('ip_address').value.trim();
+            if (!ip) return alert("Please enter an IP address");
+
+            const res = await fetch('/inspect_ip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ip_address: ip })
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                updateUIWithResult(data);
+                // Also update form inputs with telemetry signature
+                if (data.packet_features) {
+                    document.getElementById('duration').value = data.packet_features.duration || 0;
+                    document.getElementById('src_bytes').value = data.packet_features.src_bytes || 0;
+                    document.getElementById('dst_bytes').value = data.packet_features.dst_bytes || 0;
+                    document.getElementById('count').value = data.packet_features.count || 0;
+                    document.getElementById('srv_count').value = data.packet_features.srv_count || 0;
+                    document.getElementById('serror_rate').value = data.packet_features.serror_rate || 0;
+                    document.getElementById('same_srv_rate').value = data.packet_features.same_srv_rate || 0;
+                    document.getElementById('dst_host_count').value = data.packet_features.dst_host_count || 255;
+                }
+            }
+        }
+
         function setPreset(type) {
             if (type === 'normal') {
+                document.getElementById('ip_address').value = '192.168.1.45';
                 document.getElementById('duration').value = '0';
                 document.getElementById('src_bytes').value = '215';
                 document.getElementById('dst_bytes').value = '4500';
@@ -157,6 +242,7 @@
                 document.getElementById('same_srv_rate').value = '1.0';
                 document.getElementById('dst_host_count').value = '255';
             } else if (type === 'dos') {
+                document.getElementById('ip_address').value = '45.142.120.10';
                 document.getElementById('duration').value = '0';
                 document.getElementById('src_bytes').value = '0';
                 document.getElementById('dst_bytes').value = '0';
@@ -166,6 +252,7 @@
                 document.getElementById('same_srv_rate').value = '1.0';
                 document.getElementById('dst_host_count').value = '255';
             } else if (type === 'portscan') {
+                document.getElementById('ip_address').value = '185.220.101.5';
                 document.getElementById('duration').value = '2';
                 document.getElementById('src_bytes').value = '12';
                 document.getElementById('dst_bytes').value = '0';
@@ -177,9 +264,36 @@
             }
         }
 
+        function updateUIWithResult(data) {
+            document.getElementById('threat-title').innerText = data.threat_level || data.overall_threat;
+            document.getElementById('ip-target-label').innerText = 'IP Inspected: ' + (data.ip_address || 'Custom Flow');
+            document.getElementById('reputation-label').innerText = 'Reputation: ' + (data.reputation || 'Network Packet Inspection');
+
+            document.getElementById('if-val').innerText = data.isolation_forest_anomaly ? 'ANOMALY' : 'NORMAL';
+            document.getElementById('ae-val').innerText = data.autoencoder_anomaly ? 'ANOMALY' : 'NORMAL';
+            document.getElementById('mse-val').innerText = data.reconstruction_error;
+            document.getElementById('thresh-val').innerText = data.threshold;
+
+            const badge = document.getElementById('badge');
+            const fill = document.getElementById('meter-fill');
+            fill.style.width = Math.min(data.anomaly_ratio, 100) + '%';
+
+            if (data.threat_color === 'red' || (data.overall_threat && data.overall_threat.includes('ATTACK'))) {
+                badge.className = 'badge badge-red';
+                badge.innerText = '⚠️ ' + (data.threat_level || 'INTRUSION DETECTED');
+            } else if (data.threat_color === 'amber') {
+                badge.className = 'badge badge-amber';
+                badge.innerText = '⚡ ' + data.threat_level;
+            } else {
+                badge.className = 'badge badge-green';
+                badge.innerText = '✅ ' + (data.threat_level || 'BENIGN TRAFFIC');
+            }
+        }
+
         async function submitForm(e) {
             e.preventDefault();
             const payload = {
+                ip_address: document.getElementById('ip_address').value,
                 duration: document.getElementById('duration').value,
                 src_bytes: document.getElementById('src_bytes').value,
                 dst_bytes: document.getElementById('dst_bytes').value,
@@ -197,23 +311,7 @@
             });
             const data = await res.json();
             if (data.status === 'success') {
-                document.getElementById('threat-title').innerText = data.overall_threat;
-                document.getElementById('if-val').innerText = data.isolation_forest_anomaly ? 'ANOMALY' : 'NORMAL';
-                document.getElementById('ae-val').innerText = data.autoencoder_anomaly ? 'ANOMALY' : 'NORMAL';
-                document.getElementById('mse-val').innerText = data.reconstruction_error;
-                document.getElementById('thresh-val').innerText = data.threshold;
-
-                const badge = document.getElementById('badge');
-                const fill = document.getElementById('meter-fill');
-                fill.style.width = Math.min(data.anomaly_ratio, 100) + '%';
-
-                if (data.overall_threat.includes('ATTACK')) {
-                    badge.className = 'badge badge-red';
-                    badge.innerText = '⚠️ INTRUSION DETECTED';
-                } else {
-                    badge.className = 'badge badge-green';
-                    badge.innerText = '✅ BENIGN TRAFFIC';
-                }
+                updateUIWithResult(data);
             }
         }
     </script>

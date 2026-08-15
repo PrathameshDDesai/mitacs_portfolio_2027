@@ -69,8 +69,10 @@ def predict():
         return jsonify({"status": "error", "message": str(e)}), 400
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5001))
     print("================================================================")
-    print("Project 1: Hospital Length of Stay (LOS) Predictor Server")
-    print("Production Waitress WSGI Server listening on http://localhost:5001")
+    print(f"Project 1: Hospital Length of Stay (LOS) Predictor Server")
+    print(f"Production Waitress WSGI Server listening on http://localhost:{port}")
     print("================================================================")
-    serve(app, host="0.0.0.0", port=5001, threads=8)
+    serve(app, host="0.0.0.0", port=port, threads=8)
+

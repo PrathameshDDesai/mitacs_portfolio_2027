@@ -1,0 +1,28 @@
+services:
+  # Project 1: Hospital Length of Stay (LOS) Predictor
+  - type: web
+    name: hospital-los-predictor
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt && python 01_hospital_los_prediction/train_and_export.py
+    startCommand: gunicorn --chdir 01_hospital_los_prediction app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.10.0
+
+  # Project 2: AgentGuard Network Anomaly Threat Detector
+  - type: web
+    name: agentguard-anomaly-detector
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt && python 02_network_anomaly_detection/train_and_export.py
+    startCommand: gunicorn --chdir 02_network_anomaly_detection app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.10.0
