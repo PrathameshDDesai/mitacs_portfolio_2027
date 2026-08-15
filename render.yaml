@@ -5,13 +5,14 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: pip install -r requirements.txt && python 01_hospital_los_prediction/train_and_export.py
-    startCommand: gunicorn --chdir 01_hospital_los_prediction app:app
+    rootDir: 01_hospital_los_prediction
+    buildCommand: pip install -r requirements.txt && python train_and_export.py
+    startCommand: gunicorn app:app
     envVars:
       - key: FLASK_ENV
         value: production
       - key: PYTHON_VERSION
-        value: 3.10.0
+        value: 3.10.13
 
   # Project 2: AgentGuard Network Anomaly Threat Detector
   - type: web
@@ -19,10 +20,11 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: pip install -r requirements.txt && python 02_network_anomaly_detection/train_and_export.py
-    startCommand: gunicorn --chdir 02_network_anomaly_detection app:app
+    rootDir: 02_network_anomaly_detection
+    buildCommand: pip install -r requirements.txt && python train_and_export.py
+    startCommand: gunicorn app:app
     envVars:
       - key: FLASK_ENV
         value: production
       - key: PYTHON_VERSION
-        value: 3.10.0
+        value: 3.10.13

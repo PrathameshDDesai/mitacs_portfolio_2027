@@ -3,316 +3,1017 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project 2: AgentGuard Network Anomaly & IP Threat Inspector</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>AgentGuard — Threat Intelligence & Anomaly Operations Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #090d16;
-            --card-bg: rgba(30, 41, 59, 0.75);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --accent-purple: #8b5cf6;
-            --accent-blue: #3b82f6;
-            --accent-green: #10b981;
-            --accent-amber: #f59e0b;
-            --accent-red: #ef4444;
-            --text-primary: #f8fafc;
+            --bg-primary: #0b0f19;
+            --bg-surface: #111827;
+            --bg-surface-hover: #1f2937;
+            --bg-input: #0f172a;
+            --border-color: #1e293b;
+            --border-focus: #3b82f6;
+
+            --text-main: #f8fafc;
             --text-muted: #94a3b8;
+            --text-dim: #64748b;
+
+            --severity-low: #10b981;
+            --severity-medium: #f59e0b;
+            --severity-high: #f97316;
+            --severity-critical: #ef4444;
+
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.5;
             min-height: 100vh;
-            background-image: radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.2) 0px, transparent 50%),
-                              radial-gradient(at 0% 100%, rgba(239, 68, 68, 0.15) 0px, transparent 50%);
-            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
         }
 
-        .container { max-width: 1100px; margin: 0 auto; }
+        /* Top Navigation Header */
         header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border);
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .title-group h1 { font-size: 26px; font-weight: 800; }
-        .title-group p { font-size: 13px; color: var(--text-muted); }
-
-        .port-badge {
-            background: rgba(139, 92, 246, 0.2); border: 1px solid var(--accent-purple);
-            color: var(--accent-purple); padding: 6px 14px; border-radius: 20px;
-            font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        /* IP Inspector Banner */
-        .ip-banner {
-            background: rgba(15, 23, 42, 0.85); border: 1px solid var(--card-border);
-            border-radius: 16px; padding: 20px; margin-bottom: 24px;
-            display: flex; justify-content: space-between; align-items: center; gap: 16px;
+        .brand-logo {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            color: #f8fafc;
         }
 
-        .ip-input-group { display: flex; gap: 10px; flex: 1; }
-        .ip-input-group input {
-            flex: 1; background: rgba(30, 41, 59, 0.9); border: 1px solid var(--card-border);
-            color: #fff; padding: 10px 16px; border-radius: 10px; font-family: 'JetBrains Mono', monospace;
-            font-size: 14px; outline: none;
-        }
-        .ip-input-group input:focus { border-color: var(--accent-purple); }
+        .brand-logo span { color: #3b82f6; }
 
-        .btn-inspect-ip {
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-            color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700;
-            font-size: 13px; cursor: pointer; white-space: nowrap;
+        .sys-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 3px 8px;
+            border-radius: 4px;
         }
 
-        .ip-presets { display: flex; gap: 6px; }
-        .ip-preset-btn {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border);
-            color: var(--text-muted); padding: 6px 10px; border-radius: 8px; font-size: 11px;
-            font-family: 'JetBrains Mono', monospace; cursor: pointer;
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--severity-low);
+            border-radius: 50%;
         }
-        .ip-preset-btn:hover { background: rgba(139, 92, 246, 0.2); color: #fff; border-color: var(--accent-purple); }
 
-        .grid { display: grid; grid-template-columns: 6fr 6fr; gap: 24px; }
+        nav.nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-item {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 0;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--text-main);
+            border-bottom-color: #3b82f6;
+        }
+
+        /* Main Container Layout */
+        main.container {
+            max-width: 1240px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Section Cards */
         .card {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            backdrop-filter: blur(16px); border-radius: 20px; padding: 24px;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
         }
 
-        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; gap: 8px; align-items: center; }
-
-        .preset-bar { display: flex; gap: 8px; margin-bottom: 16px; }
-        .preset-btn {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border);
-            color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer;
-        }
-        .preset-btn:hover { background: rgba(255, 255, 255, 0.15); border-color: var(--accent-purple); }
-
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .form-group { display: flex; flex-direction: column; gap: 4px; }
-        .form-group label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-        .form-group input {
-            background: rgba(15, 23, 42, 0.8); border: 1px solid var(--card-border);
-            color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none;
-        }
-        .form-group input:focus { border-color: var(--accent-purple); }
-
-        .btn-submit {
-            width: 100%; background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-            color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700;
-            font-size: 14px; cursor: pointer; margin-top: 16px;
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .result-panel { text-align: center; padding: 20px; background: rgba(15, 23, 42, 0.9); border-radius: 16px; border: 1px solid var(--card-border); }
-        .threat-title { font-size: 22px; font-weight: 800; margin: 12px 0; }
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
-        .metric-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); padding: 12px; border-radius: 10px; }
-        .metric-card h4 { font-size: 11px; color: var(--text-muted); }
-        .metric-card p { font-size: 18px; font-weight: 700; margin-top: 4px; }
+        /* IP Analysis Search Bar */
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
-        .badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 12px; text-transform: uppercase; }
-        .badge-green { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
-        .badge-amber { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); border: 1px solid var(--accent-amber); }
-        .badge-red { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+        .search-bar {
+            display: flex;
+            gap: 10px;
+        }
 
-        .meter-bar { height: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 5px; overflow: hidden; margin-top: 8px; }
-        .meter-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-green), var(--accent-red)); transition: width 0.5s; }
+        .ip-input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .ip-input-wrapper span.prefix {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .ip-input {
+            width: 100%;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            padding: 10px 12px 10px 42px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .ip-input:focus {
+            border-color: var(--border-focus);
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 0 20px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+
+        .presets-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .preset-label {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .preset-tag {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .preset-tag:hover {
+            border-color: #3b82f6;
+            color: var(--text-main);
+        }
+
+        /* Threat Analysis Results Grid */
+        .threat-result-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Threat Level Segmented Bar */
+        .threat-meter-container {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .threat-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .threat-score-box {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .threat-score-num {
+            font-family: var(--font-mono);
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .threat-score-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* 4-Stage Visual Indicator Bar */
+        .stage-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            height: 10px;
+        }
+
+        .stage-segment {
+            background-color: rgba(255, 255, 255, 0.06);
+            border-radius: 2px;
+            transition: opacity 0.2s;
+            position: relative;
+        }
+
+        .stage-labels {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .stage-labels span.active-low { color: var(--severity-low); }
+        .stage-labels span.active-medium { color: var(--severity-medium); }
+        .stage-labels span.active-high { color: var(--severity-high); }
+        .stage-labels span.active-critical { color: var(--severity-critical); }
+
+        /* Color classes for Threat Levels */
+        .color-low { color: var(--severity-low); }
+        .color-medium { color: var(--severity-medium); }
+        .color-high { color: var(--severity-high); }
+        .color-critical { color: var(--severity-critical); }
+
+        .bg-low { background-color: var(--severity-low) !important; }
+        .bg-medium { background-color: var(--severity-medium) !important; }
+        .bg-high { background-color: var(--severity-high) !important; }
+        .bg-critical { background-color: var(--severity-critical) !important; }
+
+        /* Badge Pills */
+        .badge-pill {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-low { background: rgba(16, 185, 129, 0.12); color: var(--severity-low); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-medium { background: rgba(245, 158, 11, 0.12); color: var(--severity-medium); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-high { background: rgba(249, 115, 22, 0.12); color: var(--severity-high); border: 1px solid rgba(249, 115, 22, 0.3); }
+        .badge-critical { background: rgba(239, 68, 68, 0.12); color: var(--severity-critical); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* 2-Column Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 868px) {
+            .info-grid { grid-template-columns: 1fr; }
+        }
+
+        .info-block {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .info-block-header {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .data-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .data-table td {
+            padding: 8px 0;
+            font-size: 13px;
+        }
+
+        .data-table td.label {
+            color: var(--text-muted);
+            width: 40%;
+        }
+
+        .data-table td.value {
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .reasons-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .reasons-list li {
+            font-size: 12px;
+            color: var(--text-muted);
+            padding-left: 14px;
+            position: relative;
+            line-height: 1.4;
+        }
+
+        .reasons-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #3b82f6;
+        }
+
+        /* Collapsible Telemetry Fine-Tuning Drawer */
+        .collapsible-trigger {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 0;
+        }
+
+        .collapsible-trigger:hover { color: var(--text-main); }
+
+        .telemetry-form {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+            background-color: var(--bg-input);
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .telemetry-form { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-group label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .field-group input {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            padding: 6px 8px;
+            outline: none;
+        }
+
+        .field-group input:focus { border-color: var(--border-focus); }
+
+        /* History Table */
+        .history-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .table th {
+            background-color: var(--bg-input);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .table td.font-mono {
+            font-family: var(--font-mono);
+        }
+
+        /* Overview Stat Counter Bar */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 640px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .stat-card {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 6px;
+        }
+
+        .stat-card .label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-family: var(--font-mono);
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 24px;
+            font-size: 12px;
+            color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="title-group">
-                <h1>🛡️ Project 2: AgentGuard Network Anomaly & IP Threat Inspector</h1>
-                <p>Standalone Cyber-Defense ML Service (Direct IP Inspection + Deep Autoencoder & Isolation Forest)</p>
-            </div>
-            <div class="port-badge">PORT: 5002</div>
-        </header>
 
-        <!-- Direct IP Address Inspection Bar -->
-        <div class="ip-banner">
-            <div style="flex:1;">
-                <h3 style="font-size:15px; font-weight:700; margin-bottom:6px;">🔍 Direct IP Address Threat Lookup</h3>
-                <div class="ip-input-group">
-                    <input type="text" id="ip_address" placeholder="Enter IP address (e.g. 185.220.101.5 or 192.168.1.45)" value="185.220.101.5">
-                    <button class="btn-inspect-ip" onclick="inspectDirectIP()">🛡️ Check IP Threat Level</button>
-                </div>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:6px;">
-                <span style="font-size:11px; color:var(--text-muted);">Quick IP Presets:</span>
-                <div class="ip-presets">
-                    <button class="ip-preset-btn" onclick="setIPPreset('192.168.1.45')">192.168.1.45 (Local)</button>
-                    <button class="ip-preset-btn" onclick="setIPPreset('185.220.101.5')">185.220.101.5 (Tor Exit)</button>
-                    <button class="ip-preset-btn" onclick="setIPPreset('45.142.120.10')">45.142.120.10 (DoS)</button>
-                </div>
+    <!-- Header Navigation -->
+    <header>
+        <div class="brand-group">
+            <div class="brand-logo">AGENT<span>GUARD</span> // SOC</div>
+            <div class="sys-status">
+                <span class="status-dot"></span>
+                <span>ENGINE ONLINE</span>
             </div>
         </div>
 
-        <div class="grid">
-            <div class="card">
-                <div class="card-title">🌐 Packet Telemetry Features</div>
-                <div class="preset-bar">
-                    <button class="preset-btn" onclick="setPreset('normal')">Normal Web</button>
-                    <button class="preset-btn" onclick="setPreset('dos')">Neptune DoS</button>
-                    <button class="preset-btn" onclick="setPreset('portscan')">Satan Scan</button>
-                </div>
-                <form id="sec-form" onsubmit="submitForm(event)">
-                    <div class="form-grid">
-                        <div class="form-group"><label>Flow Duration</label><input type="number" id="duration" value="0"></div>
-                        <div class="form-group"><label>Source Bytes</label><input type="number" id="src_bytes" value="215"></div>
-                        <div class="form-group"><label>Destination Bytes</label><input type="number" id="dst_bytes" value="4500"></div>
-                        <div class="form-group"><label>Count</label><input type="number" id="count" value="5"></div>
-                        <div class="form-group"><label>Service Count</label><input type="number" id="srv_count" value="5"></div>
-                        <div class="form-group"><label>SYN Error Rate</label><input type="number" step="0.01" id="serror_rate" value="0.0"></div>
-                        <div class="form-group"><label>Same Service Rate</label><input type="number" step="0.01" id="same_srv_rate" value="1.0"></div>
-                        <div class="form-group"><label>Dst Host Count</label><input type="number" id="dst_host_count" value="255"></div>
+        <nav class="nav-links">
+            <a class="nav-item active" onclick="scrollToSection('ip-analysis')">IP Analysis</a>
+            <a class="nav-item" onclick="scrollToSection('threat-history')">Threat History</a>
+            <a class="nav-item" onclick="scrollToSection('telemetry-drawer')">Model Intelligence</a>
+        </nav>
+    </header>
+
+    <!-- Main SOC Container -->
+    <main class="container">
+
+        <!-- System Overview Stat Row -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Total IPs Analyzed</div>
+                <div class="value" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Critical Threats</div>
+                <div class="value color-critical" id="stat-critical">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">High Risk IPs</div>
+                <div class="value color-high" id="stat-high">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Clean / Benign IPs</div>
+                <div class="value color-low" id="stat-clean">0</div>
+            </div>
+        </div>
+
+        <!-- 1. Main Search & Analysis Section -->
+        <section class="card" id="ip-analysis">
+            <div class="card-header">
+                <div class="card-title">IP Threat Intelligence Lookup</div>
+                <span style="font-family: var(--font-mono); font-size:11px; color:var(--text-dim);">SOC ENGINE v2.4</span>
+            </div>
+
+            <div class="search-container">
+                <form onsubmit="handleAnalyzeSubmit(event)" class="search-bar">
+                    <div class="ip-input-wrapper">
+                        <span class="prefix">IP:</span>
+                        <input type="text" id="target_ip" class="ip-input" placeholder="e.g. 185.220.101.5 or 8.8.8.8" value="185.220.101.5" required>
                     </div>
-                    <button type="submit" class="btn-submit">⚡ Inspect Network Traffic</button>
+                    <button type="submit" class="btn-primary">Analyze IP</button>
                 </form>
+
+                <div class="presets-row">
+                    <span class="preset-label">Preset Targets:</span>
+                    <button class="preset-tag" onclick="selectPreset('185.220.101.5')">185.220.101.5 [Tor Exit]</button>
+                    <button class="preset-tag" onclick="selectPreset('45.142.120.10')">45.142.120.10 [DoS Subnet]</button>
+                    <button class="preset-tag" onclick="selectPreset('193.142.146.21')">193.142.146.21 [Port Scan]</button>
+                    <button class="preset-tag" onclick="selectPreset('8.8.8.8')">8.8.8.8 [Google DNS]</button>
+                    <button class="preset-tag" onclick="selectPreset('192.168.1.45')">192.168.1.45 [Local Host]</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Threat Analysis Output Results -->
+        <section class="card" id="result-panel">
+            <div class="card-header">
+                <div class="card-title">Analysis Assessment</div>
+                <div id="badge-container">
+                    <span class="badge-pill badge-low">Awaiting Query</span>
+                </div>
             </div>
 
-            <div class="card">
-                <div class="card-title">🔍 Threat Assessment Output</div>
-                <div class="result-panel">
-                    <span id="badge" class="badge badge-green">Ready to Scan</span>
-                    <div id="threat-title" class="threat-title">Awaiting Traffic</div>
-                    <p style="font-size:12px; color:var(--text-muted);" id="ip-target-label">IP Inspected: None</p>
-                    <p style="font-size:12px; font-weight:600; color:var(--accent-purple); margin-top:4px;" id="reputation-label">Reputation: Unverified</p>
+            <div class="threat-result-panel">
 
-                    <div class="metric-grid">
-                        <div class="metric-card"><h4>Isolation Forest</h4><p id="if-val">--</p></div>
-                        <div class="metric-card"><h4>Autoencoder</h4><p id="ae-val">--</p></div>
+                <!-- 4-Stage Visual Threat Level Meter -->
+                <div class="threat-meter-container">
+                    <div class="threat-header-row">
+                        <div class="threat-score-box">
+                            <span class="threat-score-num" id="threat-score-val">0</span>
+                            <span class="threat-score-label">/ 100 Threat Score</span>
+                        </div>
+                        <div style="font-family: var(--font-mono); font-size: 13px;">
+                            Target: <span id="target-ip-display" style="color: var(--text-main); font-weight:600;">--</span>
+                        </div>
                     </div>
 
-                    <div style="margin-top: 20px; text-align: left;">
-                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
-                            <span>Reconstruction MSE Loss</span>
-                            <span id="mse-val">0.0000</span>
-                        </div>
-                        <div class="meter-bar"><div id="meter-fill" class="meter-fill"></div></div>
-                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Threshold: <span id="thresh-val">--</span></p>
+                    <!-- 4 Segment Progress Bar -->
+                    <div class="stage-bar">
+                        <div id="seg-low" class="stage-segment"></div>
+                        <div id="seg-medium" class="stage-segment"></div>
+                        <div id="seg-high" class="stage-segment"></div>
+                        <div id="seg-critical" class="stage-segment"></div>
+                    </div>
+
+                    <div class="stage-labels">
+                        <span id="lbl-low">LOW</span>
+                        <span id="lbl-medium">MEDIUM</span>
+                        <span id="lbl-high">HIGH</span>
+                        <span id="lbl-critical">CRITICAL</span>
+                    </div>
+                </div>
+
+                <!-- 2 Column Data Grid -->
+                <div class="info-grid">
+
+                    <!-- Column 1: IP Intelligence Metadata -->
+                    <div class="info-block">
+                        <div class="info-block-header">IP Intelligence & Metadata</div>
+                        <table class="data-table">
+                            <tr>
+                                <td class="label">IP Address</td>
+                                <td class="value" id="meta-ip">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Threat Level</td>
+                                <td class="value" id="meta-level">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">IP Type</td>
+                                <td class="value" id="meta-type">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Country Origin</td>
+                                <td class="value" id="meta-country">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">ISP Operator</td>
+                                <td class="value" id="meta-isp">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">ASN</td>
+                                <td class="value" id="meta-asn">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Reputation Flag</td>
+                                <td class="value" id="meta-reputation" style="font-size:12px;">--</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Column 2: AI Engine Diagnostics & Reasons -->
+                    <div class="info-block">
+                        <div class="info-block-header">Detection Reasons & AI Diagnostics</div>
+                        <table class="data-table" style="margin-bottom: 12px;">
+                            <tr>
+                                <td class="label">Autoencoder MSE</td>
+                                <td class="value" id="diag-mse">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Baseline Threshold</td>
+                                <td class="value" id="diag-threshold">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Isolation Forest</td>
+                                <td class="value" id="diag-if">--</td>
+                            </tr>
+                        </table>
+
+                        <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px;">Detected Indicators</div>
+                        <ul class="reasons-list" id="reasons-container">
+                            <li>Run an IP analysis query to inspect threat detection logs.</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3. Advanced Packet Telemetry Fine-Tuning Drawer (Collapsible) -->
+        <section class="card" id="telemetry-drawer">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <button class="collapsible-trigger" onclick="toggleTelemetry()">
+                    <span id="telemetry-toggle-icon">►</span> Advanced Packet Telemetry Controls (Fine-Tune Network Parameters)
+                </button>
+                <span style="font-size:11px; color:var(--text-dim);">Optional Analyst Override</span>
+            </div>
+
+            <div id="telemetry-content" style="display: none;">
+                <div class="telemetry-form">
+                    <div class="field-group">
+                        <label>Flow Duration</label>
+                        <input type="number" id="field_duration" value="0">
+                    </div>
+                    <div class="field-group">
+                        <label>Source Bytes</label>
+                        <input type="number" id="field_src_bytes" value="215">
+                    </div>
+                    <div class="field-group">
+                        <label>Destination Bytes</label>
+                        <input type="number" id="field_dst_bytes" value="4500">
+                    </div>
+                    <div class="field-group">
+                        <label>Count (Connections)</label>
+                        <input type="number" id="field_count" value="5">
+                    </div>
+                    <div class="field-group">
+                        <label>Service Count</label>
+                        <input type="number" id="field_srv_count" value="5">
+                    </div>
+                    <div class="field-group">
+                        <label>SYN Error Rate</label>
+                        <input type="number" step="0.01" id="field_serror_rate" value="0.0">
+                    </div>
+                    <div class="field-group">
+                        <label>Same Service Rate</label>
+                        <input type="number" step="0.01" id="field_same_srv_rate" value="1.0">
+                    </div>
+                    <div class="field-group">
+                        <label>Dst Host Count</label>
+                        <input type="number" id="field_dst_host_count" value="255">
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
 
+        <!-- 4. Threat History Table -->
+        <section class="card" id="threat-history">
+            <div class="card-header">
+                <div class="card-title">Recent Threat Activity History</div>
+                <button class="preset-tag" onclick="clearHistory()">Clear Log</button>
+            </div>
+
+            <div class="history-table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>IP Address</th>
+                            <th>Threat Level</th>
+                            <th>Score</th>
+                            <th>Country</th>
+                            <th>Primary Engine Result</th>
+                            <th>Reputation / Note</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 20px;">
+                                No recent threat analyses recorded.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div>AgentGuard Threat Intelligence Operations Platform</div>
+        <div>Engine MSE Threshold: <span id="footer-thresh">0.1419</span> | Architecture: Isolation Forest + Deep Autoencoder</div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
     <script>
-        function setIPPreset(ip) {
-            document.getElementById('ip_address').value = ip;
-            inspectDirectIP();
+        let analysisHistory = JSON.parse(localStorage.getItem('agentguard_threat_history') || '[]');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistoryTable();
+            updateStats();
+            // Automatically run initial analysis for default IP
+            inspectIP('185.220.101.5');
+        });
+
+        function selectPreset(ip) {
+            document.getElementById('target_ip').value = ip;
+            inspectIP(ip);
         }
 
-        async function inspectDirectIP() {
-            const ip = document.getElementById('ip_address').value.trim();
-            if (!ip) return alert("Please enter an IP address");
-
-            const res = await fetch('/inspect_ip', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ip_address: ip })
-            });
-            const data = await res.json();
-            if (data.status === 'success') {
-                updateUIWithResult(data);
-                // Also update form inputs with telemetry signature
-                if (data.packet_features) {
-                    document.getElementById('duration').value = data.packet_features.duration || 0;
-                    document.getElementById('src_bytes').value = data.packet_features.src_bytes || 0;
-                    document.getElementById('dst_bytes').value = data.packet_features.dst_bytes || 0;
-                    document.getElementById('count').value = data.packet_features.count || 0;
-                    document.getElementById('srv_count').value = data.packet_features.srv_count || 0;
-                    document.getElementById('serror_rate').value = data.packet_features.serror_rate || 0;
-                    document.getElementById('same_srv_rate').value = data.packet_features.same_srv_rate || 0;
-                    document.getElementById('dst_host_count').value = data.packet_features.dst_host_count || 255;
-                }
-            }
-        }
-
-        function setPreset(type) {
-            if (type === 'normal') {
-                document.getElementById('ip_address').value = '192.168.1.45';
-                document.getElementById('duration').value = '0';
-                document.getElementById('src_bytes').value = '215';
-                document.getElementById('dst_bytes').value = '4500';
-                document.getElementById('count').value = '5';
-                document.getElementById('srv_count').value = '5';
-                document.getElementById('serror_rate').value = '0.0';
-                document.getElementById('same_srv_rate').value = '1.0';
-                document.getElementById('dst_host_count').value = '255';
-            } else if (type === 'dos') {
-                document.getElementById('ip_address').value = '45.142.120.10';
-                document.getElementById('duration').value = '0';
-                document.getElementById('src_bytes').value = '0';
-                document.getElementById('dst_bytes').value = '0';
-                document.getElementById('count').value = '280';
-                document.getElementById('srv_count').value = '280';
-                document.getElementById('serror_rate').value = '1.0';
-                document.getElementById('same_srv_rate').value = '1.0';
-                document.getElementById('dst_host_count').value = '255';
-            } else if (type === 'portscan') {
-                document.getElementById('ip_address').value = '185.220.101.5';
-                document.getElementById('duration').value = '2';
-                document.getElementById('src_bytes').value = '12';
-                document.getElementById('dst_bytes').value = '0';
-                document.getElementById('count').value = '150';
-                document.getElementById('srv_count').value = '1';
-                document.getElementById('serror_rate').value = '0.85';
-                document.getElementById('same_srv_rate').value = '0.05';
-                document.getElementById('dst_host_count').value = '150';
-            }
-        }
-
-        function updateUIWithResult(data) {
-            document.getElementById('threat-title').innerText = data.threat_level || data.overall_threat;
-            document.getElementById('ip-target-label').innerText = 'IP Inspected: ' + (data.ip_address || 'Custom Flow');
-            document.getElementById('reputation-label').innerText = 'Reputation: ' + (data.reputation || 'Network Packet Inspection');
-
-            document.getElementById('if-val').innerText = data.isolation_forest_anomaly ? 'ANOMALY' : 'NORMAL';
-            document.getElementById('ae-val').innerText = data.autoencoder_anomaly ? 'ANOMALY' : 'NORMAL';
-            document.getElementById('mse-val').innerText = data.reconstruction_error;
-            document.getElementById('thresh-val').innerText = data.threshold;
-
-            const badge = document.getElementById('badge');
-            const fill = document.getElementById('meter-fill');
-            fill.style.width = Math.min(data.anomaly_ratio, 100) + '%';
-
-            if (data.threat_color === 'red' || (data.overall_threat && data.overall_threat.includes('ATTACK'))) {
-                badge.className = 'badge badge-red';
-                badge.innerText = '⚠️ ' + (data.threat_level || 'INTRUSION DETECTED');
-            } else if (data.threat_color === 'amber') {
-                badge.className = 'badge badge-amber';
-                badge.innerText = '⚡ ' + data.threat_level;
-            } else {
-                badge.className = 'badge badge-green';
-                badge.innerText = '✅ ' + (data.threat_level || 'BENIGN TRAFFIC');
-            }
-        }
-
-        async function submitForm(e) {
+        function handleAnalyzeSubmit(e) {
             e.preventDefault();
-            const payload = {
-                ip_address: document.getElementById('ip_address').value,
-                duration: document.getElementById('duration').value,
-                src_bytes: document.getElementById('src_bytes').value,
-                dst_bytes: document.getElementById('dst_bytes').value,
-                count: document.getElementById('count').value,
-                srv_count: document.getElementById('srv_count').value,
-                serror_rate: document.getElementById('serror_rate').value,
-                same_srv_rate: document.getElementById('same_srv_rate').value,
-                dst_host_count: document.getElementById('dst_host_count').value
+            const ip = document.getElementById('target_ip').value.trim();
+            if (ip) inspectIP(ip);
+        }
+
+        async function inspectIP(ip) {
+            const telemetryPayload = {
+                ip_address: ip,
+                duration: document.getElementById('field_duration').value,
+                src_bytes: document.getElementById('field_src_bytes').value,
+                dst_bytes: document.getElementById('field_dst_bytes').value,
+                count: document.getElementById('field_count').value,
+                srv_count: document.getElementById('field_srv_count').value,
+                serror_rate: document.getElementById('field_serror_rate').value,
+                same_srv_rate: document.getElementById('field_same_srv_rate').value,
+                dst_host_count: document.getElementById('field_dst_host_count').value
             };
 
-            const res = await fetch('/predict', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (data.status === 'success') {
-                updateUIWithResult(data);
+            try {
+                const res = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(telemetryPayload)
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    renderAnalysisResult(data);
+                    logToHistory(data);
+                }
+            } catch (err) {
+                console.error("API error:", err);
             }
+        }
+
+        function renderAnalysisResult(data) {
+            // Update Text & Numerics
+            document.getElementById('target-ip-display').innerText = data.ip_address;
+            document.getElementById('threat-score-val').innerText = data.threat_score;
+
+            document.getElementById('meta-ip').innerText = data.ip_address;
+            document.getElementById('meta-level').innerText = data.threat_level;
+            document.getElementById('meta-type').innerText = data.ip_type;
+            document.getElementById('meta-country').innerText = data.country;
+            document.getElementById('meta-isp').innerText = data.isp;
+            document.getElementById('meta-asn').innerText = data.asn;
+            document.getElementById('meta-reputation').innerText = data.reputation;
+
+            document.getElementById('diag-mse').innerText = data.reconstruction_error;
+            document.getElementById('diag-threshold').innerText = data.threshold;
+            document.getElementById('footer-thresh').innerText = data.threshold;
+            document.getElementById('diag-if').innerText = data.isolation_forest_anomaly ? 'ANOMALY DETECTED' : 'NORMAL TRAFFIC';
+
+            // Render Reasons
+            const reasonsContainer = document.getElementById('reasons-container');
+            reasonsContainer.innerHTML = '';
+            if (data.detection_reasons && data.detection_reasons.length > 0) {
+                data.detection_reasons.forEach(r => {
+                    const li = document.createElement('li');
+                    li.innerText = r;
+                    reasonsContainer.appendChild(li);
+                });
+            }
+
+            // Update Badge & Color Styling
+            const badgeContainer = document.getElementById('badge-container');
+            const levelClass = data.threat_level.toLowerCase();
+            badgeContainer.innerHTML = `<span class="badge-pill badge-${levelClass}">● ${data.threat_level} THREAT LEVEL</span>`;
+
+            // Update 4-Stage Segment Bar
+            resetStageMeter();
+            const scoreNum = document.getElementById('threat-score-val');
+            scoreNum.className = 'threat-score-num color-' + levelClass;
+
+            const segLow = document.getElementById('seg-low');
+            const segMed = document.getElementById('seg-medium');
+            const segHigh = document.getElementById('seg-high');
+            const segCrit = document.getElementById('seg-critical');
+
+            if (data.threat_level === 'LOW') {
+                segLow.classList.add('bg-low');
+                document.getElementById('lbl-low').className = 'active-low';
+            } else if (data.threat_level === 'MEDIUM') {
+                segLow.classList.add('bg-medium');
+                segMed.classList.add('bg-medium');
+                document.getElementById('lbl-medium').className = 'active-medium';
+            } else if (data.threat_level === 'HIGH') {
+                segLow.classList.add('bg-high');
+                segMed.classList.add('bg-high');
+                segHigh.classList.add('bg-high');
+                document.getElementById('lbl-high').className = 'active-high';
+            } else if (data.threat_level === 'CRITICAL') {
+                segLow.classList.add('bg-critical');
+                segMed.classList.add('bg-critical');
+                segHigh.classList.add('bg-critical');
+                segCrit.classList.add('bg-critical');
+                document.getElementById('lbl-critical').className = 'active-critical';
+            }
+        }
+
+        function resetStageMeter() {
+            ['seg-low', 'seg-medium', 'seg-high', 'seg-critical'].forEach(id => {
+                const el = document.getElementById(id);
+                el.className = 'stage-segment';
+            });
+            ['lbl-low', 'lbl-medium', 'lbl-high', 'lbl-critical'].forEach(id => {
+                const el = document.getElementById(id);
+                el.className = '';
+            });
+        }
+
+        function logToHistory(data) {
+            const record = {
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                ip: data.ip_address,
+                level: data.threat_level,
+                score: data.threat_score,
+                country: data.country,
+                engine: data.autoencoder_anomaly ? 'Autoencoder Anomaly' : (data.isolation_forest_anomaly ? 'Isolation Forest' : 'Normal'),
+                reputation: data.reputation
+            };
+
+            // Remove existing entry for same IP to avoid duplicates
+            analysisHistory = analysisHistory.filter(h => h.ip !== data.ip_address);
+            analysisHistory.unshift(record);
+            if (analysisHistory.length > 25) analysisHistory.pop();
+
+            localStorage.setItem('agentguard_threat_history', JSON.stringify(analysisHistory));
+            renderHistoryTable();
+            updateStats();
+        }
+
+        function renderHistoryTable() {
+            const tbody = document.getElementById('history-tbody');
+            if (analysisHistory.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-dim); padding: 20px;">No recent threat analyses recorded.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = analysisHistory.map(row => {
+                const lvlClass = row.level.toLowerCase();
+                return `
+                    <tr>
+                        <td class="font-mono" style="color:var(--text-dim);">${row.timestamp}</td>
+                        <td class="font-mono" style="font-weight:600;">${row.ip}</td>
+                        <td><span class="badge-pill badge-${lvlClass}">${row.level}</span></td>
+                        <td class="font-mono color-${lvlClass}">${row.score}</td>
+                        <td>${row.country}</td>
+                        <td style="font-size:12px; color:var(--text-muted);">${row.engine}</td>
+                        <td style="font-size:12px; color:var(--text-muted);">${row.reputation}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = analysisHistory.length;
+            document.getElementById('stat-critical').innerText = analysisHistory.filter(h => h.level === 'CRITICAL').length;
+            document.getElementById('stat-high').innerText = analysisHistory.filter(h => h.level === 'HIGH').length;
+            document.getElementById('stat-clean').innerText = analysisHistory.filter(h => h.level === 'LOW').length;
+        }
+
+        function clearHistory() {
+            analysisHistory = [];
+            localStorage.removeItem('agentguard_threat_history');
+            renderHistoryTable();
+            updateStats();
+        }
+
+        function toggleTelemetry() {
+            const content = document.getElementById('telemetry-content');
+            const icon = document.getElementById('telemetry-toggle-icon');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.innerText = '▼';
+            } else {
+                content.style.display = 'none';
+                icon.innerText = '►';
+            }
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
