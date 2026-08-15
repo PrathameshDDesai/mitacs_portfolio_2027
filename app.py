@@ -116,6 +116,14 @@ def predict_anomaly():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
 
+from waitress import serve
+
 if __name__ == "__main__":
-    print("Starting MITACS Portfolio Web Server on http://localhost:5000")
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    print("================================================================")
+    print("MITACS Portfolio Production WSGI Server (Powered by Waitress)")
+    print("Hospital LOS Predictor & Network Anomaly Threat Suite")
+    print("Serving Production Web App on http://localhost:5000")
+    print("================================================================")
+    serve(app, host="0.0.0.0", port=5000, threads=8)
+
+

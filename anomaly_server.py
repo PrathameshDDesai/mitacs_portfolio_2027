@@ -294,6 +294,13 @@ def predict():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
 
+from waitress import serve
+
 if __name__ == "__main__":
-    print("Starting Standalone AgentGuard Anomaly Server on http://localhost:8000")
-    app.run(host="0.0.0.0", port=8000, debug=False)
+    print("================================================================")
+    print("AgentGuard Anomaly Detection WSGI Server (Powered by Waitress)")
+    print("Serving Dedicated Anomaly Detection Suite on http://localhost:8000")
+    print("================================================================")
+    serve(app, host="0.0.0.0", port=8000, threads=8)
+
+
