@@ -290,7 +290,6 @@
             background-color: rgba(255, 255, 255, 0.06);
             border-radius: 2px;
             transition: opacity 0.2s;
-            position: relative;
         }
 
         .stage-labels {
@@ -822,7 +821,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderHistoryTable();
             updateStats();
-            // Automatically run initial analysis for default IP
             inspectIP('185.220.101.5');
         });
 
@@ -838,28 +836,29 @@
         }
 
         async function inspectIP(ip) {
-            const telemetryPayload = {
-                ip_address: ip,
-                duration: document.getElementById('field_duration').value,
-                src_bytes: document.getElementById('field_src_bytes').value,
-                dst_bytes: document.getElementById('field_dst_bytes').value,
-                count: document.getElementById('field_count').value,
-                srv_count: document.getElementById('field_srv_count').value,
-                serror_rate: document.getElementById('field_serror_rate').value,
-                same_srv_rate: document.getElementById('field_same_srv_rate').value,
-                dst_host_count: document.getElementById('field_dst_host_count').value
-            };
-
             try {
-                const res = await fetch('/predict', {
+                // Call /inspect_ip for IP intelligence lookups
+                const res = await fetch('/inspect_ip', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(telemetryPayload)
+                    body: JSON.stringify({ ip_address: ip })
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
                     renderAnalysisResult(data);
                     logToHistory(data);
+
+                    // Update telemetry fields with packet features
+                    if (data.packet_features) {
+                        document.getElementById('field_duration').value = data.packet_features.duration || 0;
+                        document.getElementById('field_src_bytes').value = data.packet_features.src_bytes || 0;
+                        document.getElementById('field_dst_bytes').value = data.packet_features.dst_bytes || 0;
+                        document.getElementById('field_count').value = data.packet_features.count || 0;
+                        document.getElementById('field_srv_count').value = data.packet_features.srv_count || 0;
+                        document.getElementById('field_serror_rate').value = data.packet_features.serror_rate || 0;
+                        document.getElementById('field_same_srv_rate').value = data.packet_features.same_srv_rate || 0;
+                        document.getElementById('field_dst_host_count').value = data.packet_features.dst_host_count || 255;
+                    }
                 }
             } catch (err) {
                 console.error("API error:", err);
@@ -867,7 +866,6 @@
         }
 
         function renderAnalysisResult(data) {
-            // Update Text & Numerics
             document.getElementById('target-ip-display').innerText = data.ip_address;
             document.getElementById('threat-score-val').innerText = data.threat_score;
 
@@ -953,7 +951,6 @@
                 reputation: data.reputation
             };
 
-            // Remove existing entry for same IP to avoid duplicates
             analysisHistory = analysisHistory.filter(h => h.ip !== data.ip_address);
             analysisHistory.unshift(record);
             if (analysisHistory.length > 25) analysisHistory.pop();

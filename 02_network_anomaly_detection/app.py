@@ -27,11 +27,11 @@ with open(os.path.join(SAVED_MODELS_DIR, "threshold.json"), "r") as f:
 print(f"[AgentGuard SOC Platform] Detection engines initialized. Baseline MSE Threshold: {sec_threshold:.4f}")
 
 KNOWN_THREAT_RANGES = {
-    "185.220.": {"country": "DE", "isp": "Tor Exit Network", "asn": "AS208323", "reputation": "High-risk Tor Anonymizer Node"},
-    "45.142.": {"country": "RO", "isp": "HostSailor Datacenter", "asn": "AS60117", "reputation": "Known DoS/DDoS Origin Subnet"},
-    "193.142.": {"country": "NL", "isp": "M247 Europe Ltd", "asn": "AS9009", "reputation": "Frequent Port Scan Activity"},
-    "103.251.": {"country": "CN", "isp": "Chinanet Backbone", "asn": "AS4134", "reputation": "Suspicious Brute-Force Activity"},
-    "185.191.": {"country": "RU", "isp": "Selectel Network", "asn": "AS49505", "reputation": "Automated Scanner Subnet"}
+    "185.220.": {"country": "DE", "isp": "Tor Exit Network", "asn": "AS208323", "reputation": "High-risk Tor Anonymizer Node", "type": "dos"},
+    "45.142.": {"country": "RO", "isp": "HostSailor Datacenter", "asn": "AS60117", "reputation": "Known DoS/DDoS Origin Subnet", "type": "dos"},
+    "193.142.": {"country": "NL", "isp": "M247 Europe Ltd", "asn": "AS9009", "reputation": "Frequent Port Scan Activity", "type": "portscan"},
+    "103.251.": {"country": "CN", "isp": "Chinanet Backbone", "asn": "AS4134", "reputation": "Suspicious Brute-Force Activity", "type": "portscan"},
+    "185.191.": {"country": "RU", "isp": "Selectel Network", "asn": "AS49505", "reputation": "Automated Scanner Subnet", "type": "portscan"}
 }
 
 def get_ip_intel(ip_str, is_private):
@@ -54,7 +54,6 @@ def get_ip_intel(ip_str, is_private):
                 "reputation": info["reputation"]
             }
             
-    # Deterministic metadata for other IP ranges
     octets = [int(x) for x in ip_str.split(".")] if "." in ip_str and len(ip_str.split(".")) == 4 else [8, 8, 8, 8]
     countries = ["US", "DE", "GB", "JP", "FR", "NL", "CA", "AU"]
     asns = ["AS13335 Cloudflare Inc", "AS15169 Google LLC", "AS16509 Amazon.com", "AS3320 Deutsche Telekom", "AS8075 Microsoft Corp"]
@@ -82,15 +81,25 @@ def analyze_ip_address_threat(ip_str, custom_features=None):
     intel = get_ip_intel(ip_str, is_private)
     is_known_bad = any(ip_str.startswith(prefix) for prefix in KNOWN_THREAT_RANGES)
 
-    if custom_features and any(k in custom_features for k in ["serror_rate", "count", "src_bytes"]):
+    # Use custom features only if explicitly requested, otherwise generate based on IP intelligence
+    if custom_features and custom_features.get("use_custom_telemetry") is True:
         features = custom_features
     else:
         if is_known_bad:
-            features = {
-                "duration": 0, "src_bytes": 0, "dst_bytes": 0,
-                "count": 320, "srv_count": 320, "serror_rate": 1.0,
-                "same_srv_rate": 1.0, "dst_host_count": 255
-            }
+            # Check specific threat pattern type
+            threat_info = next((info for prefix, info in KNOWN_THREAT_RANGES.items() if ip_str.startswith(prefix)), {})
+            if threat_info.get("type") == "portscan":
+                features = {
+                    "duration": 2, "src_bytes": 12, "dst_bytes": 0,
+                    "count": 150, "srv_count": 1, "serror_rate": 0.85,
+                    "same_srv_rate": 0.05, "dst_host_count": 150
+                }
+            else:
+                features = {
+                    "duration": 0, "src_bytes": 0, "dst_bytes": 0,
+                    "count": 320, "srv_count": 320, "serror_rate": 1.0,
+                    "same_srv_rate": 1.0, "dst_host_count": 255
+                }
         elif is_private:
             features = {
                 "duration": 0, "src_bytes": 240, "dst_bytes": 3800,
@@ -130,21 +139,20 @@ def analyze_ip_address_threat(ip_str, custom_features=None):
     mse_error = float(np.mean(np.square(scaled_input - reconstructed)))
     ae_is_anomaly = bool(mse_error > sec_threshold)
 
-    # Threat Score calculation (0 - 100)
     anomaly_ratio = (mse_error / max(sec_threshold, 0.0001))
     
     score = 10.0
     if is_known_bad:
-        score += 50.0
+        score += 55.0
     if ae_is_anomaly:
         score += 30.0 * min(anomaly_ratio, 2.5)
     if if_is_anomaly:
         score += 25.0
-    if float(features.get("serror_rate", 0)) > 0.5:
+    if float(features.get("serror_rate", 0)) > 0.4:
         score += 15.0
 
     threat_score = int(min(max(score, 5.0), 99.0))
-    if is_known_bad or (ae_is_anomaly and if_is_anomaly and threat_score > 75):
+    if is_known_bad or (ae_is_anomaly and threat_score > 70):
         threat_score = max(threat_score, 88)
 
     # 4-Stage Threat Level Mapping
@@ -161,12 +169,11 @@ def analyze_ip_address_threat(ip_str, custom_features=None):
         threat_level = "LOW"
         threat_color = "green"
 
-    # Human-readable detection reasons
     detection_reasons = []
     if is_known_bad:
-        detection_reasons.append(f"Subnet belongs to known threat intelligence blacklists ({intel['reputation']})")
+        detection_reasons.append(f"Subnet flagged in threat intelligence database ({intel['reputation']})")
     if ae_is_anomaly:
-        detection_reasons.append(f"Deep Autoencoder detected anomalous pattern (MSE: {mse_error:.4f} vs Baseline: {sec_threshold:.4f})")
+        detection_reasons.append(f"Deep Autoencoder detected reconstruction anomaly (MSE: {mse_error:.4f} vs Baseline: {sec_threshold:.4f})")
     if if_is_anomaly:
         detection_reasons.append("Isolation Forest algorithm isolated feature vectors as out-of-distribution traffic")
     if float(features.get("serror_rate", 0)) > 0.4:
