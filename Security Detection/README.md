@@ -14,7 +14,7 @@ Performance comparison between Isolation Forest and Deep Autoencoder on the NSL-
 | Model | Normal Precision | Attack Recall | Macro F1-Score |
 | :--- | :---: | :---: | :---: |
 | **Isolation Forest** | 0.5128 | 0.2971 | **56.24%** |
-| **Deep Autoencoder** | 0.7270 | 0.7259 | **82.86%** |
+| **Deep Autoencoder** | 0.7050 | 0.7065 | **80.14%** |
 
 ### Confusion Matrix - Isolation Forest:
 ```
@@ -24,8 +24,8 @@ Performance comparison between Isolation Forest and Deep Autoencoder on the NSL-
 
 ### Confusion Matrix - Deep Autoencoder:
 ```
-[[9365  346]
- [3517 9316]]
+[[9001  710]
+ [3767 9066]]
 ```
 
 ## Future Work

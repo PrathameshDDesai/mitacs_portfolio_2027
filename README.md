@@ -15,7 +15,7 @@ Welcome to the **MITACS ML Portfolio**, demonstrating end-to-end Machine Learnin
 ### 2. 🛡️ [Security Detection: Anomaly Detection for Network Security](./Security%20Detection)
 - **Goal:** Detect cyberattacks and network intrusion attempts on the NSL-KDD benchmark dataset. Inspired by **AgentGuard behavioral monitoring**.
 - **Models:** Unsupervised Isolation Forest (`contamination=0.1`) & Deep Bottleneck Autoencoders (TensorFlow/Keras).
-- **Key Outcome:** **Isolation Forest Macro F1 = 56.24%** | **Autoencoder Macro F1 = 82.86%**.
+- **Key Outcome:** **Isolation Forest Macro F1 = 56.24%** | **Autoencoder Macro F1 = 80.14%**.
 - **Notebook:** [`02_anomaly_detection.ipynb`](./Security%20Detection/02_anomaly_detection.ipynb)
 
 ---
