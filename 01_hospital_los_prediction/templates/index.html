@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 1: Hospital Length of Stay (LOS) Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --card-bg: rgba(30, 41, 59, 0.75);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border);
+        }
+
+        .title-group h1 { font-size: 26px; font-weight: 800; }
+        .title-group p { font-size: 13px; color: var(--text-muted); }
+
+        .port-badge {
+            background: rgba(59, 130, 246, 0.2); border: 1px solid var(--accent-blue);
+            color: var(--accent-blue); padding: 6px 14px; border-radius: 20px;
+            font-size: 12px; font-weight: 700;
+        }
+
+        .grid { display: grid; grid-template-columns: 7fr 5fr; gap: 24px; }
+        .card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px); border-radius: 20px; padding: 24px;
+        }
+
+        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; gap: 8px; align-items: center; }
+
+        .preset-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border);
+            color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer;
+        }
+        .preset-btn:hover { background: rgba(255, 255, 255, 0.15); border-color: var(--accent-blue); }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .form-group input, .form-group select {
+            background: rgba(15, 23, 42, 0.8); border: 1px solid var(--card-border);
+            color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--accent-blue); }
+
+        .btn-submit {
+            width: 100%; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700;
+            font-size: 14px; cursor: pointer; margin-top: 16px;
+        }
+
+        .result-panel { text-align: center; padding: 26px; background: rgba(15, 23, 42, 0.9); border-radius: 16px; border: 1px solid var(--card-border); }
+        .metric-value { font-size: 44px; font-weight: 800; margin: 10px 0; background: linear-gradient(135deg, var(--accent-green), var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+        .metric-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); padding: 12px; border-radius: 10px; }
+        .metric-card h4 { font-size: 11px; color: var(--text-muted); }
+        .metric-card p { font-size: 18px; font-weight: 700; margin-top: 4px; }
+
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        .badge-green { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .badge-amber { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+        .badge-red { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-group">
+                <h1>🏥 Project 1: Hospital Length of Stay (LOS) Predictor</h1>
+                <p>Standalone ML Service for Healthcare Resource & Bed Allocation Management</p>
+            </div>
+            <div class="port-badge">PORT: 5001</div>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">📋 Clinical Admission Variables</div>
+                <div class="preset-bar">
+                    <button class="preset-btn" onclick="setPreset('routine')">Routine Checkup</button>
+                    <button class="preset-btn" onclick="setPreset('surgical')">Complex Surgical</button>
+                    <button class="preset-btn" onclick="setPreset('icu')">High-Severity ICU</button>
+                </div>
+                <form id="los-form" onsubmit="submitForm(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Admission Month</label>
+                            <select id="Month">
+                                <option value="Jan">January</option>
+                                <option value="Feb">February</option>
+                                <option value="Mar">March</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select id="Gender"><option value="M">Male</option><option value="F">Female</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Medical Specialty</label>
+                            <select id="Specialty">
+                                <option value="Cardiology">Cardiology</option>
+                                <option value="General Surgery">General Surgery</option>
+                                <option value="Neurology">Neurology</option>
+                                <option value="Pediatrics">Pediatrics</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Doctor Type</label>
+                            <select id="Doctor_Type">
+                                <option value="Consultant">Consultant</option>
+                                <option value="Resident">Resident</option>
+                                <option value="Specialist">Specialist</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>CMI Value (Case Mix Index)</label>
+                            <input type="number" step="0.1" id="CMI_Value" value="1.5">
+                        </div>
+                        <div class="form-group">
+                            <label>Case Severity</label>
+                            <select id="Severity">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                                <option value="Extreme">Extreme</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Insurance Plan</label>
+                            <select id="InsurancePlanName">
+                                <option value="Advance">Advance</option>
+                                <option value="NC-Blue">NC-Blue</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Hospital Revenue ($)</label>
+                            <input type="number" id="Revenue" value="12500">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit">🔮 Predict Length of Stay</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📊 Inference Output</div>
+                <div class="result-panel">
+                    <span id="badge" class="badge badge-green">Ready for Inference</span>
+                    <div id="ensemble-val" class="metric-value">-- Days</div>
+                    <p style="color:var(--text-muted); font-size:13px;">Predicted Hospital Length of Stay</p>
+
+                    <div class="metric-grid">
+                        <div class="metric-card"><h4>Random Forest</h4><p id="rf-val">--</p></div>
+                        <div class="metric-card"><h4>XGBoost</h4><p id="xgb-val">--</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setPreset(type) {
+            if (type === 'routine') {
+                document.getElementById('Month').value = 'Jan';
+                document.getElementById('Gender').value = 'M';
+                document.getElementById('Specialty').value = 'Pediatrics';
+                document.getElementById('Doctor_Type').value = 'Resident';
+                document.getElementById('CMI_Value').value = '0.8';
+                document.getElementById('Severity').value = 'Low';
+                document.getElementById('Revenue').value = '3500';
+            } else if (type === 'surgical') {
+                document.getElementById('Month').value = 'Mar';
+                document.getElementById('Gender').value = 'F';
+                document.getElementById('Specialty').value = 'General Surgery';
+                document.getElementById('Doctor_Type').value = 'Consultant';
+                document.getElementById('CMI_Value').value = '2.4';
+                document.getElementById('Severity').value = 'High';
+                document.getElementById('Revenue').value = '24000';
+            } else if (type === 'icu') {
+                document.getElementById('Month').value = 'Mar';
+                document.getElementById('Gender').value = 'M';
+                document.getElementById('Specialty').value = 'Neurology';
+                document.getElementById('Doctor_Type').value = 'Consultant';
+                document.getElementById('CMI_Value').value = '3.8';
+                document.getElementById('Severity').value = 'Extreme';
+                document.getElementById('Revenue').value = '48000';
+            }
+        }
+
+        async function submitForm(e) {
+            e.preventDefault();
+            const payload = {
+                Month: document.getElementById('Month').value,
+                Gender: document.getElementById('Gender').value,
+                Specialty: document.getElementById('Specialty').value,
+                'Doctor Type': document.getElementById('Doctor_Type').value,
+                'CMI Value': document.getElementById('CMI_Value').value,
+                Severity: document.getElementById('Severity').value,
+                InsurancePlanName: document.getElementById('InsurancePlanName').value,
+                Revenue: document.getElementById('Revenue').value
+            };
+
+            const res = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                document.getElementById('ensemble-val').innerText = data.ensemble_prediction + ' Days';
+                document.getElementById('rf-val').innerText = data.rf_prediction + ' Days';
+                document.getElementById('xgb-val').innerText = data.xgb_prediction + ' Days';
+
+                const badge = document.getElementById('badge');
+                badge.innerText = data.risk_category;
+                if (data.ensemble_prediction >= 6) {
+                    badge.className = 'badge badge-red';
+                } else if (data.ensemble_prediction >= 3.5) {
+                    badge.className = 'badge badge-amber';
+                } else {
+                    badge.className = 'badge badge-green';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
