@@ -3,185 +3,765 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project 1: Hospital Length of Stay (LOS) Predictor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Healthcare OS — Clinical Length of Stay & Bed Allocation Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #090d16;
-            --card-bg: rgba(30, 41, 59, 0.75);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --accent-blue: #3b82f6;
-            --accent-green: #10b981;
-            --accent-purple: #8b5cf6;
-            --accent-red: #ef4444;
-            --text-primary: #f8fafc;
+            --bg-primary: #0f172a;
+            --bg-surface: #1e293b;
+            --bg-input: #0f172a;
+            --border-color: #334155;
+            --border-focus: #3b82f6;
+
+            --text-main: #f8fafc;
             --text-muted: #94a3b8;
+            --text-dim: #64748b;
+
+            --severity-low: #10b981;
+            --severity-medium: #f59e0b;
+            --severity-extended: #ef4444;
+
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.5;
             min-height: 100vh;
-            background-image: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
-            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
         }
 
-        .container { max-width: 1100px; margin: 0 auto; }
+        /* Header Navigation */
         header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border);
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .title-group h1 { font-size: 26px; font-weight: 800; }
-        .title-group p { font-size: 13px; color: var(--text-muted); }
-
-        .port-badge {
-            background: rgba(59, 130, 246, 0.2); border: 1px solid var(--accent-blue);
-            color: var(--accent-blue); padding: 6px 14px; border-radius: 20px;
-            font-size: 12px; font-weight: 700;
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .grid { display: grid; grid-template-columns: 7fr 5fr; gap: 24px; }
+        .brand-logo {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            color: #f8fafc;
+        }
+
+        .brand-logo span { color: #3b82f6; }
+
+        .sys-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--severity-low);
+            border-radius: 50%;
+        }
+
+        nav.nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-item {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 0;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--text-main);
+            border-bottom-color: #3b82f6;
+        }
+
+        /* Container Layout */
+        main.container {
+            max-width: 1240px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Stat Counter Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 640px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .stat-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 6px;
+        }
+
+        .stat-card .label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-family: var(--font-mono);
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        /* Section Cards */
         .card {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            backdrop-filter: blur(16px); border-radius: 20px; padding: 24px;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
         }
 
-        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; gap: 8px; align-items: center; }
-
-        .preset-bar { display: flex; gap: 8px; margin-bottom: 16px; }
-        .preset-btn {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border);
-            color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer;
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
         }
-        .preset-btn:hover { background: rgba(255, 255, 255, 0.15); border-color: var(--accent-blue); }
 
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .form-group { display: flex; flex-direction: column; gap: 4px; }
-        .form-group label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-        .form-group input, .form-group select {
-            background: rgba(15, 23, 42, 0.8); border: 1px solid var(--card-border);
-            color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none;
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .form-group input:focus, .form-group select:focus { border-color: var(--accent-blue); }
+
+        /* Form Controls */
+        .presets-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .preset-label {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .preset-tag {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .preset-tag:hover {
+            border-color: #3b82f6;
+            color: var(--text-main);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        @media (max-width: 900px) {
+            .form-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 500px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-group label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .field-group input, .field-group select {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            padding: 8px 10px;
+            outline: none;
+        }
+
+        .field-group input:focus, .field-group select:focus {
+            border-color: var(--border-focus);
+        }
 
         .btn-submit {
-            width: 100%; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700;
-            font-size: 14px; cursor: pointer; margin-top: 16px;
+            background-color: #2563eb;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            margin-top: 16px;
+            width: 100%;
         }
 
-        .result-panel { text-align: center; padding: 26px; background: rgba(15, 23, 42, 0.9); border-radius: 16px; border: 1px solid var(--card-border); }
-        .metric-value { font-size: 44px; font-weight: 800; margin: 10px 0; background: linear-gradient(135deg, var(--accent-green), var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
 
-        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
-        .metric-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); padding: 12px; border-radius: 10px; }
-        .metric-card h4 { font-size: 11px; color: var(--text-muted); }
-        .metric-card p { font-size: 18px; font-weight: 700; margin-top: 4px; }
+        /* Results Panel */
+        .results-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-        .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
-        .badge-green { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
-        .badge-amber { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
-        .badge-red { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+        .meter-container {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .meter-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .metric-score-box {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .metric-score-num {
+            font-family: var(--font-mono);
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .metric-score-unit {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* 3-Stage Visual Indicator Bar */
+        .stage-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            height: 10px;
+        }
+
+        .stage-segment {
+            background-color: rgba(255, 255, 255, 0.06);
+            border-radius: 2px;
+            transition: opacity 0.2s;
+        }
+
+        .stage-labels {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .stage-labels span.active-low { color: var(--severity-low); }
+        .stage-labels span.active-medium { color: var(--severity-medium); }
+        .stage-labels span.active-extended { color: var(--severity-extended); }
+
+        .color-low { color: var(--severity-low); }
+        .color-medium { color: var(--severity-medium); }
+        .color-extended { color: var(--severity-extended); }
+
+        .bg-low { background-color: var(--severity-low) !important; }
+        .bg-medium { background-color: var(--severity-medium) !important; }
+        .bg-extended { background-color: var(--severity-extended) !important; }
+
+        /* Badge Pills */
+        .badge-pill {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-low { background: rgba(16, 185, 129, 0.12); color: var(--severity-low); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-medium { background: rgba(245, 158, 11, 0.12); color: var(--severity-medium); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-extended { background: rgba(239, 68, 68, 0.12); color: var(--severity-extended); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* 2-Column Clinical Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 868px) {
+            .info-grid { grid-template-columns: 1fr; }
+        }
+
+        .info-block {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .info-block-header {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .data-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .data-table td {
+            padding: 8px 0;
+            font-size: 13px;
+        }
+
+        .data-table td.label {
+            color: var(--text-muted);
+            width: 45%;
+        }
+
+        .data-table td.value {
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .notes-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .notes-list li {
+            font-size: 12px;
+            color: var(--text-muted);
+            padding-left: 14px;
+            position: relative;
+            line-height: 1.4;
+        }
+
+        .notes-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #3b82f6;
+        }
+
+        /* History Table */
+        .history-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .table th {
+            background-color: var(--bg-input);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .table td.font-mono {
+            font-family: var(--font-mono);
+        }
+
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 24px;
+            font-size: 12px;
+            color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="title-group">
-                <h1>🏥 Project 1: Hospital Length of Stay (LOS) Predictor</h1>
-                <p>Standalone ML Service for Healthcare Resource & Bed Allocation Management</p>
-            </div>
-            <div class="port-badge">PORT: 5001</div>
-        </header>
 
-        <div class="grid">
-            <div class="card">
-                <div class="card-title">📋 Clinical Admission Variables</div>
-                <div class="preset-bar">
-                    <button class="preset-btn" onclick="setPreset('routine')">Routine Checkup</button>
-                    <button class="preset-btn" onclick="setPreset('surgical')">Complex Surgical</button>
-                    <button class="preset-btn" onclick="setPreset('icu')">High-Severity ICU</button>
-                </div>
-                <form id="los-form" onsubmit="submitForm(event)">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Admission Month</label>
-                            <select id="Month">
-                                <option value="Jan">January</option>
-                                <option value="Feb">February</option>
-                                <option value="Mar">March</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Gender</label>
-                            <select id="Gender"><option value="M">Male</option><option value="F">Female</option></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Medical Specialty</label>
-                            <select id="Specialty">
-                                <option value="Cardiology">Cardiology</option>
-                                <option value="General Surgery">General Surgery</option>
-                                <option value="Neurology">Neurology</option>
-                                <option value="Pediatrics">Pediatrics</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Doctor Type</label>
-                            <select id="Doctor_Type">
-                                <option value="Consultant">Consultant</option>
-                                <option value="Resident">Resident</option>
-                                <option value="Specialist">Specialist</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>CMI Value (Case Mix Index)</label>
-                            <input type="number" step="0.1" id="CMI_Value" value="1.5">
-                        </div>
-                        <div class="form-group">
-                            <label>Case Severity</label>
-                            <select id="Severity">
-                                <option value="Low">Low</option>
-                                <option value="Medium" selected>Medium</option>
-                                <option value="High">High</option>
-                                <option value="Extreme">Extreme</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Insurance Plan</label>
-                            <select id="InsurancePlanName">
-                                <option value="Advance">Advance</option>
-                                <option value="NC-Blue">NC-Blue</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Hospital Revenue ($)</label>
-                            <input type="number" id="Revenue" value="12500">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-submit">🔮 Predict Length of Stay</button>
-                </form>
-            </div>
-
-            <div class="card">
-                <div class="card-title">📊 Inference Output</div>
-                <div class="result-panel">
-                    <span id="badge" class="badge badge-green">Ready for Inference</span>
-                    <div id="ensemble-val" class="metric-value">-- Days</div>
-                    <p style="color:var(--text-muted); font-size:13px;">Predicted Hospital Length of Stay</p>
-
-                    <div class="metric-grid">
-                        <div class="metric-card"><h4>Random Forest</h4><p id="rf-val">--</p></div>
-                        <div class="metric-card"><h4>XGBoost</h4><p id="xgb-val">--</p></div>
-                    </div>
-                </div>
+    <!-- Header Navigation -->
+    <header>
+        <div class="brand-group">
+            <div class="brand-logo">HEALTHCARE<span>OS</span> // CLINICAL</div>
+            <div class="sys-status">
+                <span class="status-dot"></span>
+                <span>LOS PREDICTOR ONLINE</span>
             </div>
         </div>
-    </div>
 
+        <nav class="nav-links">
+            <a class="nav-item active" onclick="scrollToSection('admission-form')">Admission Assessment</a>
+            <a class="nav-item" onclick="scrollToSection('admission-history')">Patient Risk Logs</a>
+            <a class="nav-item" onclick="scrollToSection('result-panel')">Ensemble Benchmarks</a>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+
+        <!-- System Overview Stat Row -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Total Assessments</div>
+                <div class="value" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Short Stay (< 3 Days)</div>
+                <div class="value color-low" id="stat-short">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Moderate Stay (3-6 Days)</div>
+                <div class="value color-medium" id="stat-moderate">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Extended Stay (> 6 Days)</div>
+                <div class="value color-extended" id="stat-extended">0</div>
+            </div>
+        </div>
+
+        <!-- 1. Admission Form Card -->
+        <section class="card" id="admission-form">
+            <div class="card-header">
+                <div class="card-title">Patient Admission Profile & Variables</div>
+                <span style="font-family: var(--font-mono); font-size:11px; color:var(--text-dim);">ENSEMBLE v1.8</span>
+            </div>
+
+            <div class="presets-row">
+                <span class="preset-label">Clinical Presets:</span>
+                <button class="preset-tag" onclick="selectPreset('routine')">Case #101: Pediatric Routine (Short Stay)</button>
+                <button class="preset-tag" onclick="selectPreset('surgical')">Case #204: Cardiac Surgery (Moderate)</button>
+                <button class="preset-tag" onclick="selectPreset('icu')">Case #309: Neurological ICU (Extended)</button>
+            </div>
+
+            <form onsubmit="handleFormSubmit(event)">
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>Admission Month</label>
+                        <select id="Month">
+                            <option value="Jan">January</option>
+                            <option value="Feb">February</option>
+                            <option value="Mar">March</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Gender</label>
+                        <select id="Gender">
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Medical Specialty</label>
+                        <select id="Specialty">
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="General Surgery">General Surgery</option>
+                            <option value="Neurology">Neurology</option>
+                            <option value="Pediatrics">Pediatrics</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Attending Doctor Type</label>
+                        <select id="Doctor_Type">
+                            <option value="Consultant">Consultant</option>
+                            <option value="Resident">Resident</option>
+                            <option value="Specialist">Specialist</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Case Mix Index (CMI)</label>
+                        <input type="number" step="0.1" id="CMI_Value" value="1.5" required>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Case Severity Level</label>
+                        <select id="Severity">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                            <option value="Extreme">Extreme</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Primary Payor Plan</label>
+                        <select id="InsurancePlanName">
+                            <option value="Advance">Advance</option>
+                            <option value="NC-Blue">NC-Blue</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Est. Revenue ($)</label>
+                        <input type="number" id="Revenue" value="12500" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">Predict Length of Stay</button>
+            </form>
+        </section>
+
+        <!-- 2. Prediction Assessment Output -->
+        <section class="card" id="result-panel">
+            <div class="card-header">
+                <div class="card-title">Length of Stay Prediction & Allocation</div>
+                <div id="badge-container">
+                    <span class="badge-pill badge-low">Ready for Assessment</span>
+                </div>
+            </div>
+
+            <div class="results-panel">
+
+                <!-- 3-Stage Visual Indicator Bar -->
+                <div class="meter-container">
+                    <div class="meter-header-row">
+                        <div class="metric-score-box">
+                            <span class="metric-score-num" id="predicted-days-val">--</span>
+                            <span class="metric-score-unit">Days</span>
+                        </div>
+                        <div style="font-family: var(--font-mono); font-size: 13px;">
+                            Ensemble Variance: <span id="model-variance-val" style="color: var(--text-main); font-weight:600;">--</span>
+                        </div>
+                    </div>
+
+                    <!-- 3 Segment Progress Bar -->
+                    <div class="stage-bar">
+                        <div id="seg-low" class="stage-segment"></div>
+                        <div id="seg-medium" class="stage-segment"></div>
+                        <div id="seg-extended" class="stage-segment"></div>
+                    </div>
+
+                    <div class="stage-labels">
+                        <span id="lbl-low">SHORT STAY (&lt; 3 DAYS)</span>
+                        <span id="lbl-medium">MODERATE STAY (3-6 DAYS)</span>
+                        <span id="lbl-extended">EXTENDED STAY (&gt; 6 DAYS)</span>
+                    </div>
+                </div>
+
+                <!-- 2 Column Clinical Grid -->
+                <div class="info-grid">
+
+                    <!-- Column 1: Patient Admission Profile -->
+                    <div class="info-block">
+                        <div class="info-block-header">Admission Profile & Resource Allocation</div>
+                        <table class="data-table">
+                            <tr>
+                                <td class="label">Predicted Stay Duration</td>
+                                <td class="value" id="meta-stay">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Bed Allocation Guidance</td>
+                                <td class="value" id="meta-bed" style="font-size:12px;">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Case Severity</td>
+                                <td class="value" id="meta-severity">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Case Mix Index (CMI)</td>
+                                <td class="value" id="meta-cmi">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Attending Specialty</td>
+                                <td class="value" id="meta-specialty">--</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Column 2: ML Model Ensemble Diagnostics -->
+                    <div class="info-block">
+                        <div class="info-block-header">Model Diagnostics & Clinical Guidance</div>
+                        <table class="data-table" style="margin-bottom: 12px;">
+                            <tr>
+                                <td class="label">Random Forest Regressor</td>
+                                <td class="value" id="diag-rf">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">XGBoost Regressor</td>
+                                <td class="value" id="diag-xgb">--</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Ensemble Consensus</td>
+                                <td class="value" id="diag-consensus">--</td>
+                            </tr>
+                        </table>
+
+                        <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px;">Clinical Operational Notes</div>
+                        <ul class="notes-list" id="notes-container">
+                            <li>Submit an admission assessment to generate clinical discharge guidance notes.</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3. Patient Admission History Log -->
+        <section class="card" id="admission-history">
+            <div class="card-header">
+                <div class="card-title">Recent Admission Logs & Predictions</div>
+                <button class="preset-tag" onclick="clearHistory()">Clear History</button>
+            </div>
+
+            <div class="history-table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Specialty</th>
+                            <th>Severity</th>
+                            <th>CMI</th>
+                            <th>Predicted Stay</th>
+                            <th>Risk Category</th>
+                            <th>Bed Allocation Guidance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 20px;">
+                                No recent admission risk evaluations recorded.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div>Healthcare OS — Clinical Length of Stay Decision Support Platform</div>
+        <div>Model Ensemble: Random Forest (MAE 0.24d) + XGBoost (MAE 0.28d)</div>
+    </footer>
+
+    <!-- JavaScript Logic -->
     <script>
-        function setPreset(type) {
+        let patientHistory = JSON.parse(localStorage.getItem('healthcare_los_history') || '[]');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistoryTable();
+            updateStats();
+            // Automatically run initial prediction for default case
+            runPrediction();
+        });
+
+        function selectPreset(type) {
             if (type === 'routine') {
                 document.getElementById('Month').value = 'Jan';
                 document.getElementById('Gender').value = 'M';
@@ -207,42 +787,166 @@
                 document.getElementById('Severity').value = 'Extreme';
                 document.getElementById('Revenue').value = '48000';
             }
+            runPrediction();
         }
 
-        async function submitForm(e) {
+        function handleFormSubmit(e) {
             e.preventDefault();
+            runPrediction();
+        }
+
+        async function runPrediction() {
             const payload = {
                 Month: document.getElementById('Month').value,
                 Gender: document.getElementById('Gender').value,
                 Specialty: document.getElementById('Specialty').value,
                 'Doctor Type': document.getElementById('Doctor_Type').value,
-                'CMI Value': document.getElementById('CMI_Value').value,
+                'CMI Value': parseFloat(document.getElementById('CMI_Value').value),
                 Severity: document.getElementById('Severity').value,
                 InsurancePlanName: document.getElementById('InsurancePlanName').value,
-                Revenue: document.getElementById('Revenue').value
+                Revenue: parseFloat(document.getElementById('Revenue').value)
             };
 
-            const res = await fetch('/predict', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (data.status === 'success') {
-                document.getElementById('ensemble-val').innerText = data.ensemble_prediction + ' Days';
-                document.getElementById('rf-val').innerText = data.rf_prediction + ' Days';
-                document.getElementById('xgb-val').innerText = data.xgb_prediction + ' Days';
-
-                const badge = document.getElementById('badge');
-                badge.innerText = data.risk_category;
-                if (data.ensemble_prediction >= 6) {
-                    badge.className = 'badge badge-red';
-                } else if (data.ensemble_prediction >= 3.5) {
-                    badge.className = 'badge badge-amber';
-                } else {
-                    badge.className = 'badge badge-green';
+            try {
+                const res = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    renderPredictionResults(data);
+                    logToHistory(data);
                 }
+            } catch (err) {
+                console.error("Prediction error:", err);
             }
+        }
+
+        function renderPredictionResults(data) {
+            document.getElementById('predicted-days-val').innerText = data.ensemble_prediction;
+            document.getElementById('model-variance-val').innerText = '±' + data.model_variance + ' Days';
+
+            document.getElementById('meta-stay').innerText = data.ensemble_prediction + ' Days';
+            document.getElementById('meta-bed').innerText = data.bed_guidance;
+            document.getElementById('meta-severity').innerText = data.severity;
+            document.getElementById('meta-cmi').innerText = data.cmi_value;
+            document.getElementById('meta-specialty').innerText = data.specialty;
+
+            document.getElementById('diag-rf').innerText = data.rf_prediction + ' Days';
+            document.getElementById('diag-xgb').innerText = data.xgb_prediction + ' Days';
+            document.getElementById('diag-consensus').innerText = 'Ensemble Average (' + data.ensemble_prediction + ' Days)';
+
+            // Render Clinical Notes
+            const notesContainer = document.getElementById('notes-container');
+            notesContainer.innerHTML = '';
+            if (data.clinical_notes && data.clinical_notes.length > 0) {
+                data.clinical_notes.forEach(n => {
+                    const li = document.createElement('li');
+                    li.innerText = n;
+                    notesContainer.appendChild(li);
+                });
+            }
+
+            // Update Badge & Color Styling
+            const badgeContainer = document.getElementById('badge-container');
+            const levelClass = data.risk_level.toLowerCase();
+            badgeContainer.innerHTML = `<span class="badge-pill badge-${levelClass}">● ${data.risk_category}</span>`;
+
+            // Update 3-Stage Progress Segment Meter Bar
+            resetStageMeter();
+            const daysNum = document.getElementById('predicted-days-val');
+            daysNum.className = 'metric-score-num color-' + levelClass;
+
+            const segLow = document.getElementById('seg-low');
+            const segMed = document.getElementById('seg-medium');
+            const segExt = document.getElementById('seg-extended');
+
+            if (data.risk_level === 'LOW') {
+                segLow.classList.add('bg-low');
+                document.getElementById('lbl-low').className = 'active-low';
+            } else if (data.risk_level === 'MODERATE') {
+                segLow.classList.add('bg-medium');
+                segMed.classList.add('bg-medium');
+                document.getElementById('lbl-medium').className = 'active-medium';
+            } else if (data.risk_level === 'EXTENDED') {
+                segLow.classList.add('bg-extended');
+                segMed.classList.add('bg-extended');
+                segExt.classList.add('bg-extended');
+                document.getElementById('lbl-extended').className = 'active-extended';
+            }
+        }
+
+        function resetStageMeter() {
+            ['seg-low', 'seg-medium', 'seg-extended'].forEach(id => {
+                const el = document.getElementById(id);
+                el.className = 'stage-segment';
+            });
+            ['lbl-low', 'lbl-medium', 'lbl-extended'].forEach(id => {
+                const el = document.getElementById(id);
+                el.className = '';
+            });
+        }
+
+        function logToHistory(data) {
+            const record = {
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                specialty: data.specialty,
+                severity: data.severity,
+                cmi: data.cmi_value,
+                predictedStay: data.ensemble_prediction + ' Days',
+                riskLevel: data.risk_level,
+                riskCategory: data.risk_category,
+                bedGuidance: data.bed_guidance
+            };
+
+            patientHistory.unshift(record);
+            if (patientHistory.length > 25) patientHistory.pop();
+
+            localStorage.setItem('healthcare_los_history', JSON.stringify(patientHistory));
+            renderHistoryTable();
+            updateStats();
+        }
+
+        function renderHistoryTable() {
+            const tbody = document.getElementById('history-tbody');
+            if (patientHistory.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-dim); padding: 20px;">No recent admission risk evaluations recorded.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = patientHistory.map(row => {
+                const lvlClass = row.riskLevel.toLowerCase();
+                return `
+                    <tr>
+                        <td class="font-mono" style="color:var(--text-dim);">${row.timestamp}</td>
+                        <td>${row.specialty}</td>
+                        <td>${row.severity}</td>
+                        <td class="font-mono">${row.cmi}</td>
+                        <td class="font-mono color-${lvlClass}" style="font-weight:600;">${row.predictedStay}</td>
+                        <td><span class="badge-pill badge-${lvlClass}">${row.riskLevel}</span></td>
+                        <td style="font-size:12px; color:var(--text-muted);">${row.bedGuidance}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = patientHistory.length;
+            document.getElementById('stat-short').innerText = patientHistory.filter(h => h.riskLevel === 'LOW').length;
+            document.getElementById('stat-moderate').innerText = patientHistory.filter(h => h.riskLevel === 'MODERATE').length;
+            document.getElementById('stat-extended').innerText = patientHistory.filter(h => h.riskLevel === 'EXTENDED').length;
+        }
+
+        function clearHistory() {
+            patientHistory = [];
+            localStorage.removeItem('healthcare_los_history');
+            renderHistoryTable();
+            updateStats();
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
